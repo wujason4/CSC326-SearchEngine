@@ -8,7 +8,7 @@
 <body>
     <h2>JDubbs Search Engine 1.0</h2>
 
-    <p align="center">
+    <p>
         Please type in a search string below!
     </p>
 

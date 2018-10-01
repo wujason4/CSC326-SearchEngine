@@ -11,22 +11,28 @@
     <p align="center">
         This is the results page...
     </p>
+
+    <br>
+    <br>
+    {{!table}}
+    <br>
+    <br>
      
-     <table align="center" style="text-align:center;" >
+<!--      <table align="center" style="text-align:center;" >
         <thead>
             <tr>
                 <th colspan="2">
-                    Search for: {{param}}
+                    Searched for: {{str}}
                 </th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>The table body</td>
-                <td>With two Columns</td>
+                <td>Key Word</td>
+                <td>Number of Times</td>
             </tr>
         </tbody>
-    </table>
+    </table> -->
 
     <form action="/">
         <input type="submit" value="Go back home!"/>
