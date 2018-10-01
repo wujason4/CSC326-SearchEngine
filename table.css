@@ -1,10 +1,17 @@
-table,
-td {
-    border: 1px solid black;
+/* Style the input form */
+form{
+	margin: auto;
+	width: 50%
+	padding: 10px;
 }
 
-thead,
-tfoot {
-    background-color: black;
-    color: white
+/* Style the table */
+table{
+	width: 600px;
 }
+
+table, th, td{
+    border: 1px solid black;
+	/*border-collapse: collapse;*//*this will get rid of the double border*/
+}
+

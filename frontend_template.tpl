@@ -8,29 +8,22 @@
 <body>
     <h2>JDubbs Search Engine 1.0</h2>
 
-    <p>Please type in a search string below!</p>
+    <p align="center">
+        Please type in a search string below!
+    </p>
 
-    <form>
-        Type Here:
-        <input type="text" name="search_string" />
-        <input type="submit" name="submit" />
+<!--     <form action="display.py">
+ -->        
+
+
+    <form action="/results" method="post">
+        Type Here: <input type="text" name="keywords" />
+        <input type="submit" value="Search!"/>
     </form>
 
     <br>
     <br>
-    <table align="center" style="text-align:center;" >
-        <thead>
-            <tr>
-                <th colspan="2">Search for <i>"insert search string here..."</i></th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>The table body</td>
-                <td>With two Columns</td>
-            </tr>
-        </tbody>
-    </table>
+    
 
 </body>
 </html>
