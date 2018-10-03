@@ -237,15 +237,17 @@ class crawler(object):
             if word in self._ignored_words:
                 continue
             self._curr_words.append((self.word_id(word), self._font_size))
-        	
-	    word_id = self.word_id(word)
-	    if word_id in self._inverted_index_cache:
-		self._inverted_index_cache[word_id].add(self._curr_doc_id)
-		self._resolved_inverted_index_cache[word].add(self._curr_url)
+            self.update_index(word)
 
-	    else:
-		self._inverted_index_cache[word_id] = set([self._curr_doc_id])
-		self._resolved_inverted_index_cache[word] = set([self._curr_url])
+    def update_index(self,word):
+	word_id = self.word_id(word)
+	if word_id in self._inverted_index_cache:
+	    self._inverted_index_cache[word_id].add(self._curr_doc_id)
+	    self._resolved_inverted_index_cache[word].add(self._curr_url)
+
+	else:
+	    self._inverted_index_cache[word_id] = set([self._curr_doc_id])
+	    self._resolved_inverted_index_cache[word] = set([self._curr_url])
 
     def get_inverted_index(self):
     	return self._inverted_index_cache
