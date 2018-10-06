@@ -6,24 +6,22 @@
     <title>CSC326 - Lab1</title>
 </head>
 <body>
-    <h2>JDubbs Search Engine 1.0</h2>
+    <h2 id="logo" align="center">JDubbs Search Engine 1.0</h2>
 
-    <p>
+    <p align="center">
         Please type in a search string below!
     </p>
 
-<!--     <form action="display.py">
- -->        
-
-
-    <form action="/results" method="post">
-        Type Here: <input type="text" name="keywords" />
-        <input type="submit" value="Search!"/>
+    <br>
+    <br>
+    <form id="search_input" action="/results" method="post">
+        <input type="text" name="keywords">
+        <input id="button" type="submit" value="Search!"/>
     </form>
-
-    <br>
-    <br>
     
+    <br>
+    <br>
 
+ 
 </body>
 </html>

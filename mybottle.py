@@ -11,11 +11,6 @@ def home_page():
 def server_static(filename):
     return static_file(filename, root='./')
 
-# Results Page
-@get('/results')
-def show_results_get():
-	return
-
 @post('/results')
 def show_results(table=''):
 		# Get the search string
@@ -53,26 +48,6 @@ def show_results(table=''):
 
 
 		return template('results', table=final_table)
-
-
-
-# # TESTING TABLE CREATOR #
-# @route('/test')
-# def test():
-# 	return template('test')
-
-# @post('/testResults')
-# def test_results(par=''):
-# 	num = int(request.forms.get('num_rows'))
-# 	final_table = "<table><thead><tr><th colspan=\"2\">Wanted: " + str(num) + "rows</th></tr></thead><tbody>"
-
-# 	for i in range(num):
-# 		final_table = final_table + "<tr><td>Word</td><td>{}</td></tr>\n".format(i)
-
-# 	final_table = final_table + "</tbody></table>"
-
-# 	return template('test_results', par=final_table)
-
 
 
 
