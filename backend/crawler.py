@@ -352,11 +352,13 @@ class crawler(object):
             finally:
                 if socket:
                     socket.close()
-            break
+            #break
 
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")
     bot.crawl(depth=1)
+    print bot.get_inverted_index()
+    print ("=========================================")
     print bot.get_resolved_inverted_index()
 	
 	
