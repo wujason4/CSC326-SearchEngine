@@ -1,15 +1,29 @@
 /* Style the input form */
 #search_input{
-	left: 50%;
-	top: 50%;
-	margin-left: -20%;
-    position: absolute;
-    margin-top: -10%;
-    width: 1000px;
+	width: 30%;
+	padding: 8px 8px;
+	border-style: solid;
+	border-color: rgba(0, 128, 0, 0.3);
+	border-width: 5px;
+	border-radius: 8px;
+	background-color: white;
+/*    background-image: url('searchicon.png');
+*/    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    padding-left: 40px;
+}
+
+#button{
+	width: 15%;
 }
 
 #logo{
 	margin-top: 15%;
+}
+
+div{
+	margin-left: 0 auto;
+	text-align: center;
 }
 
 /* Style the table */
