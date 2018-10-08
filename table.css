@@ -1,8 +1,15 @@
 /* Style the input form */
-form{
-	margin: auto;
-	width: 50%
-	padding: 10px;
+#search_input{
+	left: 50%;
+	top: 50%;
+	margin-left: -20%;
+    position: absolute;
+    margin-top: -10%;
+    width: 1000px;
+}
+
+#logo{
+	margin-top: 15%;
 }
 
 /* Style the table */
