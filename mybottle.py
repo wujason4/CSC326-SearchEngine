@@ -13,7 +13,8 @@ history = collections.OrderedDict()
 # Home Page
 @route('/')
 def home_page():
-    return template('home_page')
+	pic = 'logo.png'
+	return template('home_page', picture=pic)
 
 # Static CSS file for the home_page table
 @route('/static/<filename>')
@@ -79,8 +80,8 @@ def show_results(stable='', htable=''):
 		# Create the table!! #
 		##############################
 		# 1) Style the table firsts
-		final_table = "<table align=\"center\" style=\"text-align:center;\">"
-		history_table = "<table align=\"center\" style=\"text-align:center;\">"
+		final_table = "<table>"
+		history_table = "<table>"
 		
 		# 2) Add the table heading
 		final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr></thead><tbody>".format(original_string)

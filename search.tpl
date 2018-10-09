@@ -3,29 +3,37 @@
 
 <head>
     <link rel="stylesheet" href="/static/table.css">
-    <title>CSC326 - Lab1</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <title>WaWu Search</title>
 </head>
+
 <body>
-    <h2 id="logo" align="center">JDubbs Search Engine 1.0</h2>
+
+    <img id="logo" src="/static/logo.png" height="120" width="180">
+    <div id="main_container">
+
+        <h2 id="title">WaWu</h2>
+
+            <form action="/search" method="post">
+                <input id="search_input" type="text" name="keywords">
+                <br>
+                <br>
+                <input id="button" type="submit" value="Search!"/>
+            </form>
+    </div>
 
     <br>
     <br>
-    <div>
-        <form action="/search" method="post">
-            <input id="search_input" type="text" name="keywords">
-            <br>
-            <br>
-            <input id="button" type="submit" value="Search!"/>
-        </form>
+    <div id="search_table">
+        {{!stable}}
     </div>
     <br>
-
+    <div id="history_table">
+        {{!htable}}
+    </div>
     <br>
     <br>
-    {{!stable}}
-    <br>
-    <br>
-    {{!htable}}
+    
      
 <!--      <table align="center" style="text-align:center;" >
         <thead>
