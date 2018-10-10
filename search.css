@@ -1,9 +1,10 @@
 /* Style the input form */
 #search_input{
-/*	background-color: blue;
-*/	width: 30%;
+	/*background-color: blue;*/
+	width: 30%;
 	padding: 8px 8px;
 	border-style: solid;
+	/*custom green color*/
 	border-color: rgba(0, 128, 0, 0.3);
 	border-width: 5px;
 	border-radius: 8px;
@@ -24,8 +25,8 @@
 }
 
 #button{
-/*	background: red;
-*/	width: 15%;
+	/*background: red;*/
+	width: 15%;
 	top: 300px;
 	font-family: 'Open Sans', sans-serif;
 	font-style: bold;
@@ -44,7 +45,7 @@
     color: black;
 }
 
-#button:active {
+#button:active{
   background-color: lightgrey;
   box-shadow: 0 5px #666;
   transform: translateY(6px);
@@ -56,23 +57,56 @@
 	margin: 0px;
 	margin-top: 10%;
 	margin-left: 10%;
+
+	/*custom green color*/
 	color: rgba(0, 128, 0, 0.55);
 /*	color: black;*/
 	font-size: 42px;
 	font-family: 'Open Sans', sans-serif;
 }
 
-#main_container {
+#main_container{
 	text-align: center;
 }
 
+#search_table{
+	/*background-color: brown;*/
+	float: left;
+	margin-left: 16%;
+	font-family: 'Open Sans', sans-serif;
+	overflow-y: auto;
+	height: 395px;
+
+}
+ #history_table{
+ 	/*background-color: purple;*/
+ 	float: right;
+ 	margin-right: 16%;
+ 	font-family: 'Open Sans', sans-serif;
+ 	overflow-y: auto;
+ 	height: 395px;
+ }
+
 /* Style the table */
-table{
-	width: 600px;
+table, th, td{
+    border: 2px solid black;
+    width: 600px;
+    text-align: center;
+    border-radius: 3px;
+
+    /*this will get rid of the double border*/
+	/*border-collapse: collapse;*/
 }
 
-table, th, td{
-    border: 1px solid black;
-	/*border-collapse: collapse;*//*this will get rid of the double border*/
+th{
+	background-color: white;
+}
+
+tr:hover td{
+	background-color: grey;
+}
+
+tr:nth-child(odd){
+	background-color: lightgrey;
 }
 

@@ -1,6 +1,7 @@
 # from bottle import route, template, run, static_file
 from bottle import *
 import collections
+import re
 
 ############
 #  TO DO:  #
@@ -9,6 +10,7 @@ import collections
 # - change all of the .format() to f-string
 
 history = collections.OrderedDict()
+HISTORY_MAX_LENGTH = 20
 
 # Home Page
 @route('/')
@@ -31,45 +33,53 @@ def show_results(stable='', htable=''):
 		global history
 		checked = []
 
-		# Extract whole words from the search string
+		# Extract whole words from the search string, may include repeats
 		# **Should return ['word1', 'word2', 'word3']
+		# char_regex = r"[^\W\?$]|[^']|"
+		# string = re.sub(char_regex, '', original_string)
+
+		# print "\n\nafter char_regex: ", string
 		string = original_string.split()
+		# print "after split: ", string
 		
-		# Iterate through every word in the search string
+		# Extract all unique words and store with count
 		for word in string:
-			if not word in checked:
-				checked.append(word)
 
-				regex = r"\b" + re.escape(word) + r"\b"
-				count = sum(1 for match in re.finditer(regex, original_string))
-				
-				if len(history) < 20:
+			regex = r"\b" + re.escape(word) + r"\b"
+			count = sum(1 for match in re.finditer(regex, original_string))
 
-					if word not in keyword_set:
+			if word not in keyword_set:
 						keyword_set[word] = count
-
-
-					if word in history:
-						print "\n\ncount in 1: ", count
-						history[word] += count
-					else:
-						history[word] = count
-
-
-				# History list already has 20 words, find least searched
-				else:
-					min_searched_count = min(history.keys())
 					
-					for x in history:
-						if history[x] == min_searched_count:
-							del history[x]
+		print "HISTORY_LENGTH: ", len(history)
+
+		
+		# For every unique searched word
+		for s_word, s_count in keyword_set.items():
+
+			# Check if word already in history
+			if s_word in history:
+				history[s_word] += s_count
+			
+			# word not in history, delete an entry from history and add new word
+			else:
+
+				# Check if history has reached max length
+				if len(history) < HISTORY_MAX_LENGTH:
+					history[s_word] = s_count
+
+				else:
+					min_searched_count = min(history.values())
+
+					# Delete min searched word
+					for h_word, h_count in history.items():
+
+						if h_count == min_searched_count:
+							del history[h_word]
 							break
 
-					if word in history:
-						print "\n\ncount in 2: ", count
-						history[word] += count
-					else:
-						history[word] = count
+					# Add newly searched to history
+					history[s_word] = s_count
 
 
 		# Sort histrory in DESCENDING order
@@ -84,8 +94,8 @@ def show_results(stable='', htable=''):
 		history_table = "<table>"
 		
 		# 2) Add the table heading
-		final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr></thead><tbody>".format(original_string)
-		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr></thead><tbody>"
+		final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>".format(original_string)
+		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
 
 
 		# 3) Add the table data

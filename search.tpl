@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="/static/table.css">
+    <link rel="stylesheet" href="/static/search.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <title>WaWu Search</title>
 </head>
@@ -24,13 +24,15 @@
 
     <br>
     <br>
+
     <div id="search_table">
         {{!stable}}
     </div>
-    <br>
+
     <div id="history_table">
         {{!htable}}
     </div>
+
     <br>
     <br>
     
