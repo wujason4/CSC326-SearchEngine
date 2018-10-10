@@ -241,10 +241,10 @@ class crawler(object):
             self.update_index(word)
 
     def update_index(self,word):
-	    word_id = self.word_id(word)
-	    if word_id in self._inverted_index_cache:
-	       self._inverted_index_cache[word_id].add(self._curr_doc_id)
-	       self._resolved_inverted_index_cache[word].add(self._curr_url)
+	word_id = self.word_id(word)
+	if word_id in self._inverted_index_cache:
+	    self._inverted_index_cache[word_id].add(self._curr_doc_id)
+	    self._resolved_inverted_index_cache[word].add(self._curr_url)
 
     	else:
     	    self._inverted_index_cache[word_id] = set([self._curr_doc_id])
@@ -353,12 +353,10 @@ class crawler(object):
             finally:
                 if socket:
                     socket.close()
-            # break
 
 if __name__ == "__main__":
     bot = crawler(None, "urls.txt")
     bot.crawl(depth=1)
-    print bot.get_resolved_inverted_index()
-	
+
 	
 
