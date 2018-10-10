@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="/static/table.css">
+    <link rel="stylesheet" href="/static/search.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <title>WaWu Search</title>
 </head>
@@ -10,7 +10,7 @@
 <body>
 
     <img id="logo" src="/static/logo.png" height="120" width="180">
-    <div>
+    <div id="main_container">
 
         <h2 id="title">WaWu</h2>
 
@@ -24,9 +24,18 @@
 
     <br>
     <br>
-    {{!table}}
+
+    <div id="search_table">
+        {{!stable}}
+    </div>
+
+    <div id="history_table">
+        {{!htable}}
+    </div>
+
     <br>
     <br>
+    
      
 <!--      <table align="center" style="text-align:center;" >
         <thead>
@@ -44,9 +53,9 @@
         </tbody>
     </table> -->
 
-    <form action="/">
+<!--     <form action="/">
         <input type="submit" value="Go back home!"/>
-    </form>
+    </form> -->
 
     <br>
     <br>

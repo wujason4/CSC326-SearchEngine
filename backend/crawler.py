@@ -238,23 +238,28 @@ class crawler(object):
                 continue
             self._curr_words.append((self.word_id(word), self._font_size))
             
+            #update the inverted index and resolved inverted index for each word
             self.update_index(word)
 
     def update_index(self,word):
-	word_id = self.word_id(word)
-	if word_id in self._inverted_index_cache:
-	    self._inverted_index_cache[word_id].add(self._curr_doc_id)
-	    self._resolved_inverted_index_cache[word].add(self._curr_url)
+        """Add word_id and doc_id to inverted index. Add word and curr_url
+        to resolved inverted index."""
+    	word_id = self.word_id(word)
+    	if word_id in self._inverted_index_cache:
+    	    self._inverted_index_cache[word_id].add(self._curr_doc_id)
+    	    self._resolved_inverted_index_cache[word].add(self._curr_url)
 
     	else:
     	    self._inverted_index_cache[word_id] = set([self._curr_doc_id])
     	    self._resolved_inverted_index_cache[word] = set([self._curr_url])
 
     def get_inverted_index(self):
+        """returns the inverted index"""
     	return self._inverted_index_cache
 
     def get_resolved_inverted_index(self):
-	return self._resolved_inverted_index_cache
+        """returns the resolved inverted index"""
+        return self._resolved_inverted_index_cache
 
     def _text_of(self, elem):
         """Get the text inside some element without any tags."""
