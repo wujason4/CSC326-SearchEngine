@@ -13,8 +13,8 @@ from googleapiclient.discovery import build
 ############
 # - decide whether to store history as DEQUEUE or ORDEREDDICT
 # - change all of the .format() to f-string
-
-history = collections.OrderedDict()
+current_status = 'visitor'
+#history = collections.OrderedDict()
 HISTORY_MAX_LENGTH = 20
 SCOPES = ['https://www.googleapis.com/auth/plus.me ','https://www.googleapis.com/auth/userinfo.email']
 
@@ -37,14 +37,15 @@ def home_page():
 	user_email = session['user_email'] if 'user_email' in session else False
 	user_name = session['user_name'] if 'user_name' in session else ''
 	user_pic = session['user_pic'] if 'user_pic' in session else ''
-	user_history = user_searchHistory[email] if email in history else {}
+	user_history = user_searchHistory[email] if email in user_searchHistory else {}
 	
 	print"====DEFAULT SESSION======"
 	print session
 	print"====DEFAULT SESSION======"
-
+	global current_status
+	status_arg = "<p align=""center"">status: %s</p>" % current_status
 	pic = 'logo.png'
-	return template('home_page', picture=pic)
+	return template('home_page', status = status_arg, picture=pic)
 
 
 # Static CSS file for the home_page table
@@ -55,6 +56,8 @@ def server_static(filename):
 @route('/login','GET')
 def login():
 	print "signing in"
+	global current_status
+	current_status = 'user'
 	session = request.environ.get('beaker.session')
 	flow = flow_from_clientsecrets("client_secrets.json",
 						scope= SCOPES, 
@@ -67,8 +70,10 @@ def login():
 def logout():
 	session = request.environ.get('beaker.session')
 	session.delete()
+	global current_status
 	print "=============================12==============================\n"
 	print "sign out success"
+	current_status = 'visitor'
 	print "=============================12==============================\n"
 	return redirect('/')
 
@@ -109,6 +114,9 @@ def redirect_page():
 
 @post('/search')
 def show_results(stable='', htable=''):
+		
+		history = collections.OrderedDict()
+
 		session = request.environ.get('beaker.session')
 		user_email = session['user_email'] if 'user_email' in session else ''
 
@@ -121,7 +129,7 @@ def show_results(stable='', htable=''):
 		
 		# Initialize the dictionary of unique words
 		keyword_set = dict()
-		global history
+		#global history
 		checked = []
 
 		# Extract whole words from the search string, may include repeats
@@ -196,21 +204,23 @@ def show_results(stable='', htable=''):
 		# 2) Add the table heading
 		final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>".format(original_string)
 		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
-
-
-		# 3) Add the table data
-		for i in keyword_set:
-			final_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(i, keyword_set[i])
-
-		for key, value in sorted_history.iteritems():
-			history_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(key, value)
-
-
-		# 4) Close off the table
-		final_table = final_table + "</tbody></table>"
-		history_table = history_table + "</tbody></table>"
-
-
+		final_table, history_table = create_table(final_table, history_table, sorted_history, keyword_set)
+		
 		return template('search', stable=final_table, htable=history_table)
+def create_table(final_table,history_table, sorted_history, keyword_set):
+
+	# 3) Add the table data
+	for i in keyword_set:
+		final_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(i, keyword_set[i])
+
+	for key, value in sorted_history.iteritems():
+		history_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(key, value)
+
+
+	# 4) Close off the table
+	final_table = final_table + "</tbody></table>"
+	history_table = history_table + "</tbody></table>"
+
+	return final_table, history_table
 
 run(app=app, host='localhost', port=8080, debug=True)
