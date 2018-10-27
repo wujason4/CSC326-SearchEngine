@@ -51,6 +51,22 @@
   transform: translateY(6px);
 }
 
+#button_login, #button_logout{
+	/*background: red;*/
+	width: auto;
+	top: auto;
+	font-family: 'Open Sans', sans-serif;
+	font-style: bold;
+	font-size: 12px;
+	border-radius: 5px;
+	border-color: lightgrey;
+	border-width: 3px;
+	background-color: rgb(230, 230, 230);
+	box-shadow: 0 2px rgb(110, 110, 110);
+	-webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
 #title{
 	/*background: green;*/
 	vertical-align: top;
@@ -72,7 +88,7 @@
 #search_table{
 	/*background-color: brown;*/
 	float: left;
-	margin-left: 16%;
+	margin-left: 3%;
 	font-family: 'Open Sans', sans-serif;
 	overflow-y: auto;
 	height: 395px;
@@ -81,7 +97,7 @@
  #history_table{
  	/*background-color: purple;*/
  	float: right;
- 	margin-right: 16%;
+ 	margin-right: 6%;
  	font-family: 'Open Sans', sans-serif;
  	overflow-y: auto;
  	height: 395px;

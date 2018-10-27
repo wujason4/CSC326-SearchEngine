@@ -23,10 +23,11 @@
     </div>
 
     <br>
-    <p align="center">
-        <a href="login">Sign in</a>
-        <a href="logout">Sign out</a>
-    </p>
+	<center>
+        {{!logging}}
+		{{!status}}
+    </center>
+   
     <br>
 
     <br>

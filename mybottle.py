@@ -1,4 +1,3 @@
-# from bottle import route, template, run, static_file
 from bottle import *
 import collections
 import re
@@ -14,7 +13,6 @@ from googleapiclient.discovery import build
 # - decide whether to store history as DEQUEUE or ORDEREDDICT
 # - change all of the .format() to f-string
 current_status = 'visitor'
-#history = collections.OrderedDict()
 HISTORY_MAX_LENGTH = 20
 SCOPES = ['https://www.googleapis.com/auth/plus.me ','https://www.googleapis.com/auth/userinfo.email']
 
@@ -26,26 +24,29 @@ session_opts = {
 }
 
 app = SessionMiddleware(app(),session_opts)
-user_searchHistory = {}
+user_searchHistory = collections.OrderedDict()
 
 # Home Page
-@route('/')
+@route('/',method=['GET','POST'])
 def home_page():
-	print "WUTWUTUWUT"
 	session = request.environ.get('beaker.session')
 	
 	user_email = session['user_email'] if 'user_email' in session else False
 	user_name = session['user_name'] if 'user_name' in session else ''
 	user_pic = session['user_pic'] if 'user_pic' in session else ''
-	user_history = user_searchHistory[email] if email in user_searchHistory else {}
-	
-	print"====DEFAULT SESSION======"
-	print session
-	print"====DEFAULT SESSION======"
+	user_history = user_searchHistory[email] if email in user_searchHistory else None
+
 	global current_status
+	login = "<form action=\"/login\" method=\"get\"><input id=\"button_login\" type=\"submit\" value=\"login\"/></form>"
+	logout = "<form action=\"/logout\" method=\"get\"><input id=\"button_logout\" type=\"submit\" value=\"logout\"/></form>"
 	status_arg = "<p align=""center"">status: %s</p>" % current_status
+
 	pic = 'logo.png'
-	return template('home_page', status = status_arg, picture=pic)
+	if current_status != 'visitor':
+		log_arg = logout
+	else:
+		log_arg = login
+	return template('home_page', logging = log_arg, status = status_arg, picture=pic)
 
 
 # Static CSS file for the home_page table
@@ -61,8 +62,7 @@ def login():
 	session = request.environ.get('beaker.session')
 	flow = flow_from_clientsecrets("client_secrets.json",
 						scope= SCOPES, 
-						redirect_uri="http://localhost:8080/redirect",
-						prompt="select_account")
+						redirect_uri="http://localhost:8080/redirect")
 	uri = flow.step1_get_authorize_url()
 	return redirect(str(uri))
 	
@@ -71,10 +71,7 @@ def logout():
 	session = request.environ.get('beaker.session')
 	session.delete()
 	global current_status
-	print "=============================12==============================\n"
-	print "sign out success"
 	current_status = 'visitor'
-	print "=============================12==============================\n"
 	return redirect('/')
 
 @route ('/redirect')
@@ -94,52 +91,43 @@ def redirect_page():
 	#Get user email
 	users_service = build('oauth2','v2',http=http)
 	user_document = users_service.userinfo().get().execute()
-	print "=============================56==============================\n"
-	print user_document
-	print "=============================56==============================\n"
 	
 	session = request.environ.get('beaker.session')
 	session['user_email'] = user_document['email']
 	session['user_name'] = user_document['name']
 	session['pic'] = user_document['picture']
-	session.save()
-	
-	print "=============================67==============================\n"
-	print session
-	print "=============================67==============================\n"
+
 	# After logging in go back to home page
-	print "DONEDONEDONE"
 	redirect('/')
 
 
 @post('/search')
 def show_results(stable='', htable=''):
-		
 		history = collections.OrderedDict()
-
 		session = request.environ.get('beaker.session')
 		user_email = session['user_email'] if 'user_email' in session else ''
-
+		global current_status, logout, login 
 		if user_email not in user_searchHistory:
-			user_searchHistory[user_email] = set() 
-
+			user_searchHistory[user_email] = collections.OrderedDict()
+		
+		# If logged in, use the history from user_searchHistory and add to that
+		# Else, reset history 
+		if current_status != 'visitor':
+			user_history = user_searchHistory[user_email]
+		else:
+			visitor_history = collections.OrderedDict()
 
 		# Get the search string
 		original_string = request.forms.get('keywords')
 		
 		# Initialize the dictionary of unique words
 		keyword_set = dict()
-		#global history
 		checked = []
 
 		# Extract whole words from the search string, may include repeats
 		# **Should return ['word1', 'word2', 'word3']
-		# char_regex = r"[^\W\?$]|[^']|"
-		# string = re.sub(char_regex, '', original_string)
 
-		# print "\n\nafter char_regex: ", string
 		string = original_string.split()
-		# print "after split: ", string
 		
 		# Extract all unique words and store with count
 		for word in string:
@@ -148,52 +136,15 @@ def show_results(stable='', htable=''):
 			count = sum(1 for match in re.finditer(regex, original_string))
 
 			if word not in keyword_set:
-						keyword_set[word] = count
+				keyword_set[word] = count
 					
 		print "HISTORY_LENGTH: ", len(history)
 
-		
-		# For every unique searched word
-		for s_word, s_count in keyword_set.items():
+		if current_status != 'visitor':
+			sorted_history = sort_search(user_history, keyword_set)
+		else:
+			sorted_history = sort_search(visitor_history,keyword_set)
 
-			# Check if word already in history
-			if s_word in history:
-				history[s_word] += s_count
-			
-			# word not in history, delete an entry from history and add new word
-			else:
-
-				# Check if history has reached max length
-				if len(history) < HISTORY_MAX_LENGTH:
-					history[s_word] = s_count
-
-				else:
-					min_searched_count = min(history.values())
-
-					# Delete min searched word
-					for h_word, h_count in history.items():
-
-						if h_count == min_searched_count:
-							del history[h_word]
-							break
-
-					# Add newly searched to history
-					history[s_word] = s_count
-
-
-		# Sort histrory in DESCENDING order
-		sorted_history = collections.OrderedDict(sorted(history.iteritems(), key=lambda (k,v): (v,k), reverse=True))
-		
-		for word in sorted_history:
-			print '==========89=========\n'
-			print word
-			print '==========89=========\n'
-			user_searchHistory[user_email].add(word)
-
-		for w in user_searchHistory[user_email]:
-			print '==========90=========\n'
-			print w
-			print '==========90=========\n'
 		##############################	
 		# Create the table!! #
 		##############################
@@ -206,10 +157,51 @@ def show_results(stable='', htable=''):
 		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
 		final_table, history_table = create_table(final_table, history_table, sorted_history, keyword_set)
 		
-		return template('search', stable=final_table, htable=history_table)
+		login = "<form action=\"/login\" method=\"get\"><input id=\"button_login\" type=\"submit\" value=\"login\"/></form>"
+		logout = "<form action=\"/logout\" method=\"get\"><input id=\"button_logout\" type=\"submit\" value=\"logout\"/></form>"
+		status_arg = "<p align=""center"">status: %s</p>" % current_status
+
+		if current_status != 'visitor':
+			log_arg = logout
+		else:
+			log_arg = login
+		return template('search', logging=log_arg, status = status_arg, stable=final_table, htable=history_table)
+
+def sort_search(history, keyword_set):
+# For every unique searched word
+	for s_word, s_count in keyword_set.items():
+
+		# Check if word already in history
+		if s_word in history:
+			history[s_word] += s_count
+		
+		# word not in history, delete an entry from history and add new word
+		else:
+
+			# Check if user history has reached max length
+			if len(history) < HISTORY_MAX_LENGTH:
+				history[s_word] = s_count
+
+			else:
+				min_searched_count = min(history.values())
+
+				# Delete min searched word
+				for h_word, h_count in history.items():
+
+					if h_count == min_searched_count:
+						del history[h_word]
+						break
+
+				# Add newly searched to user history
+				history[s_word] = s_count
+
+	# Sort histrory in DESCENDING order
+	sorted_history = collections.OrderedDict(sorted(history.iteritems(), key=lambda (k,v): (v,k), reverse=True))
+	return sorted_history
+
 def create_table(final_table,history_table, sorted_history, keyword_set):
 
-	# 3) Add the table data
+	#Add the table data
 	for i in keyword_set:
 		final_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(i, keyword_set[i])
 
@@ -217,10 +209,11 @@ def create_table(final_table,history_table, sorted_history, keyword_set):
 		history_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(key, value)
 
 
-	# 4) Close off the table
+	#Close off the table
 	final_table = final_table + "</tbody></table>"
 	history_table = history_table + "</tbody></table>"
 
 	return final_table, history_table
+
 
 run(app=app, host='localhost', port=8080, debug=True)
