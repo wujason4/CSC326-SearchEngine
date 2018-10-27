@@ -8,7 +8,6 @@
 </head>
 
 <body>
-
     <img id="logo" src="/static/logo.png" height="120" width="180">
     <div id="main_container">
 
@@ -20,7 +19,13 @@
                 <br>
                 <input id="button" type="submit" value="Search!"/>
             </form>
+            
     </div>
+    <br>
+    <p align="center">
+		    <a href="login">Sign in</a>
+            <a href="logout">Sign out</a>
+    </p>
     <br>
     <br>
 

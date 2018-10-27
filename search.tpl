@@ -23,6 +23,13 @@
     </div>
 
     <br>
+    <p align="center">
+        <a href="login">Sign in</a>
+        <a href="logout">Sign out</a>
+    </p>
+    <br>
+
+    <br>
     <br>
 
     <div id="search_table">

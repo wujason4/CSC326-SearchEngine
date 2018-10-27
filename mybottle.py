@@ -2,7 +2,12 @@
 from bottle import *
 import collections
 import re
-
+import httplib2
+from beaker.middleware import SessionMiddleware
+from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.client import flow_from_clientsecrets
+from googleapiclient.errors import HttpError
+from googleapiclient.discovery import build
 ############
 #  TO DO:  #
 ############
@@ -11,20 +16,106 @@ import re
 
 history = collections.OrderedDict()
 HISTORY_MAX_LENGTH = 20
+SCOPES = ['https://www.googleapis.com/auth/plus.me ','https://www.googleapis.com/auth/userinfo.email']
+
+session_opts = {
+	'session.type': 'file',
+	'session.cookie_expires': 300,
+	'session.data_dir': './data',
+	'session.auto': True
+}
+
+app = SessionMiddleware(app(),session_opts)
+user_searchHistory = {}
 
 # Home Page
 @route('/')
 def home_page():
+	print "WUTWUTUWUT"
+	session = request.environ.get('beaker.session')
+	
+	user_email = session['user_email'] if 'user_email' in session else False
+	user_name = session['user_name'] if 'user_name' in session else ''
+	user_pic = session['user_pic'] if 'user_pic' in session else ''
+	user_history = user_searchHistory[email] if email in history else {}
+	
+	print"====DEFAULT SESSION======"
+	print session
+	print"====DEFAULT SESSION======"
+
 	pic = 'logo.png'
 	return template('home_page', picture=pic)
+
 
 # Static CSS file for the home_page table
 @route('/static/<filename>')
 def server_static(filename):
     return static_file(filename, root='./')
 
+@route('/login','GET')
+def login():
+	print "signing in"
+	session = request.environ.get('beaker.session')
+	flow = flow_from_clientsecrets("client_secrets.json",
+						scope= SCOPES, 
+						redirect_uri="http://localhost:8080/redirect",
+						prompt="select_account")
+	uri = flow.step1_get_authorize_url()
+	return redirect(str(uri))
+	
+@route ('/logout')
+def logout():
+	session = request.environ.get('beaker.session')
+	session.delete()
+	print "=============================12==============================\n"
+	print "sign out success"
+	print "=============================12==============================\n"
+	return redirect('/')
+
+@route ('/redirect')
+def redirect_page():
+	code = request.query.get('code','')
+	flow = OAuth2WebServerFlow(client_id = '80715897647-7q7d2n7ginn7arer5a5dh0gu254vqtuq.apps.googleusercontent.com',
+								client_secret='uyIulo6GxU9sA8oLb4P365Vm',
+								scope=SCOPES,
+								redirect_uri="http://localhost:8080/redirect")
+
+	credentials = flow.step2_exchange(code)
+	token = credentials.id_token['sub']
+
+	http = httplib2.Http()
+	http = credentials.authorize(http)
+
+	#Get user email
+	users_service = build('oauth2','v2',http=http)
+	user_document = users_service.userinfo().get().execute()
+	print "=============================56==============================\n"
+	print user_document
+	print "=============================56==============================\n"
+	
+	session = request.environ.get('beaker.session')
+	session['user_email'] = user_document['email']
+	session['user_name'] = user_document['name']
+	session['pic'] = user_document['picture']
+	session.save()
+	
+	print "=============================67==============================\n"
+	print session
+	print "=============================67==============================\n"
+	# After logging in go back to home page
+	print "DONEDONEDONE"
+	redirect('/')
+
+
 @post('/search')
 def show_results(stable='', htable=''):
+		session = request.environ.get('beaker.session')
+		user_email = session['user_email'] if 'user_email' in session else ''
+
+		if user_email not in user_searchHistory:
+			user_searchHistory[user_email] = set() 
+
+
 		# Get the search string
 		original_string = request.forms.get('keywords')
 		
@@ -84,8 +175,17 @@ def show_results(stable='', htable=''):
 
 		# Sort histrory in DESCENDING order
 		sorted_history = collections.OrderedDict(sorted(history.iteritems(), key=lambda (k,v): (v,k), reverse=True))
+		
+		for word in sorted_history:
+			print '==========89=========\n'
+			print word
+			print '==========89=========\n'
+			user_searchHistory[user_email].add(word)
 
-
+		for w in user_searchHistory[user_email]:
+			print '==========90=========\n'
+			print w
+			print '==========90=========\n'
 		##############################	
 		# Create the table!! #
 		##############################
@@ -113,5 +213,4 @@ def show_results(stable='', htable=''):
 
 		return template('search', stable=final_table, htable=history_table)
 
-
-run(host='localhost', port=8080, debug=True)
+run(app=app, host='localhost', port=8080, debug=True)
