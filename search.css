@@ -40,6 +40,15 @@
     transition-duration: 0.4s;
 }
 
+#status{
+	/*background: red;*/
+	width: 15%;
+	top: 300px;
+	font-family: 'Open Sans', sans-serif;
+	font-style: bold;
+	font-size: 17px;
+}
+
 #button:hover{
 	background-color: lightgrey;
     color: black;
