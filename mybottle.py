@@ -216,4 +216,4 @@ def create_table(final_table,history_table, sorted_history, keyword_set):
 	return final_table, history_table
 
 
-run(app=app, host='localhost', port=8080, debug=True)
+run(app=app, host='0.0.0.0', port=80, debug=True)
