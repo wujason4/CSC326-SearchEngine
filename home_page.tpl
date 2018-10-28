@@ -24,8 +24,9 @@
     <br>
     <center>
             {{!logging}}
-			{{!status}}
- 
+            <div id="status">
+			    {{!status}}
+            </div>
     <br>
     <br>
 
