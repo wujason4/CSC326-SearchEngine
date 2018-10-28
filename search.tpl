@@ -23,6 +23,14 @@
     </div>
 
     <br>
+	<center>
+        {{!logging}}
+		{{!status}}
+    </center>
+   
+    <br>
+
+    <br>
     <br>
 
     <div id="search_table">
