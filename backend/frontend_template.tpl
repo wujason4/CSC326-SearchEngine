@@ -13,8 +13,7 @@
     <p align="center">
 			<br>
 		    <a href="page1.tpl">Test Page 1</a>
-			<br>
-			<a href="page2.tpl">Test Page 2</a>
+			
     </p>
 
    

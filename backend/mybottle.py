@@ -13,7 +13,9 @@ def test_page():
 @route('/page2.tpl')
 def test_page():
     return template('page2')
-
+@route('/page3.tpl')
+def test_page():
+    return template('page3')
 # Static CSS file for the home_page table
 @route('/static/<filename>')
 def server_static(filename):

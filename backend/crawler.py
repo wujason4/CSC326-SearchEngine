@@ -24,6 +24,8 @@ import urlparse
 from BeautifulSoup import *
 from collections import defaultdict
 import re
+import sqlite3 as lite
+from pagerank import page_rank
 
 def attr(elem, attr):
     """An html attribute from an html element. E.g. <a href="">, then
@@ -34,6 +36,7 @@ def attr(elem, attr):
         return ""
 
 WORD_SEPARATORS = re.compile(r'\s|\n|\r|\t|[^a-zA-Z0-9\-_]')
+con = None
 
 class crawler(object):
     """Represents 'Googlebot'. Populates a database by crawling and indexing
@@ -49,11 +52,13 @@ class crawler(object):
         self._doc_id_cache = { }
         self._word_id_cache = { }
 
-	#111222 inverted index 
-	self._inverted_index_cache = { }
-	self._resolved_inverted_index_cache = { }
-	#111222
+        #inverted index 
+        self._inverted_index_cache = { }
+        self._resolved_inverted_index_cache = { }
 
+
+        self._page_relations = [ ]
+        self._doc_id_score = { }
         # functions to call when entering and exiting specific tags
         self._enter = defaultdict(lambda *a, **ka: self._visit_ignore)
         self._exit = defaultdict(lambda *a, **ka: self._visit_ignore)
@@ -105,10 +110,9 @@ class crawler(object):
             'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
             'u', 'v', 'w', 'x', 'y', 'z', 'and', 'or',
         ])
-
-        # TODO remove me in real version
-        self._mock_next_doc_id = 1
-        self._mock_next_word_id = 1
+        # keep track of the row ids in lexicon and document_id db table 
+        self._next_doc_id = 1
+        self._next_word_id = 1
 
         # keep track of some info about the page we are currently parsing
         self._curr_depth = 0
@@ -125,20 +129,42 @@ class crawler(object):
         except IOError:
             pass
     
-    # TODO remove me in real version
-    def _mock_insert_document(self, url):
-        """A function that pretends to insert a url into a document db table
+    def _insert_document(self, url):
+        """A function that inserts a url into a document db table
         and then returns that newly inserted document's id."""
-        ret_id = self._mock_next_doc_id
-        self._mock_next_doc_id += 1
+        global con
+        cur = con.cursor()
+        parse_url = "\'"+str(url)+"\'"
+
+        cur.execute("SELECT * FROM document_index WHERE url = " + parse_url)
+        data = cur.fetchone()
+        if data:
+            ret_id = data[0]
+        else:
+            parse_url = "\'"+str(url)+"\'"
+            cur.execute("INSERT INTO document_index values(?,?)", (self._next_doc_id,parse_url))
+            con.commit()
+            ret_id = self._next_doc_id
+
+        self._next_doc_id += 1
         return ret_id
     
-    # TODO remove me in real version
-    def _mock_insert_word(self, word):
-        """A function that pretends to inster a word into the lexicon db table
+    def _insert_word(self, word):
+        """A function that insterts a word into the lexicon db table
         and then returns that newly inserted word's id."""
-        ret_id = self._mock_next_word_id
-        self._mock_next_word_id += 1
+        global con 
+        cur = con.cursor()
+        parse_word = "\'"+str(word)+"\'"
+        cur.execute("SELECT word_id FROM lexicon WHERE word = " + parse_word)
+        data = cur.fetchone()
+        if data:
+            ret_id = data[0]
+        else:
+            parse_word = "\'"+str(word)+"\'"
+            cur.execute("INSERT INTO lexicon values(?,?)",(self._next_word_id,parse_word))
+            con.commit()
+            ret_id = self._next_word_id
+        self._next_word_id += 1
         return ret_id
     
     def word_id(self, word):
@@ -151,7 +177,7 @@ class crawler(object):
         #       2) query the lexicon for the id assigned to this word, 
         #          store it in the word id cache, and return the id.
 
-        word_id = self._mock_insert_word(word)
+        word_id = self._insert_word(word)
         self._word_id_cache[word] = word_id
         return word_id
     
@@ -164,7 +190,7 @@ class crawler(object):
         #       doesn't exist in the db then only insert the url and leave
         #       the rest to their defaults.
         
-        doc_id = self._mock_insert_document(url)
+        doc_id = self._insert_document(url)
         self._doc_id_cache[url] = doc_id
         return doc_id
     
@@ -184,7 +210,7 @@ class crawler(object):
     def add_link(self, from_doc_id, to_doc_id):
         """Add a link into the database, or increase the number of links between
         two pages in the database."""
-        # TODO
+        self._page_relations.append((from_doc_id,to_doc_id))
 
     def _visit_title(self, elem):
         """Called when visiting the <title> tag."""
@@ -320,7 +346,10 @@ class crawler(object):
 
     def crawl(self, depth=2, timeout=3):
         """Crawl the web!"""
+        global con
         seen = set()
+
+        self.initialize_db()
 
         while len(self._url_queue):
 
@@ -358,10 +387,55 @@ class crawler(object):
             finally:
                 if socket:
                     socket.close()
+        self.get_page_rank()
+        self.insert_page_rank_db()
+        self.insert_inverted_index()
+        con.close()
+
+    def get_page_rank(self):
+        page_rank_score = page_rank(self._page_relations)
+        for doc_id in page_rank_score:
+            self._doc_id_score[doc_id] = page_rank_score[doc_id]
+        return self._doc_id_score
+
+    def insert_page_rank_db(self):
+        global con 
+        cur = con.cursor()
+        for doc_id in self._doc_id_score:
+            cur.execute("INSERT INTO page_rank_score values(?,?)", (doc_id,self._doc_id_score[doc_id]))
+            con.commit()
+    
+    def insert_inverted_index(self):
+        global con
+        cur = con.cursor()
+        for word_id in self._inverted_index_cache:
+            parse_word = "\'"+str(self._inverted_index_cache[word_id])+"\'"
+            cur.execute("INSERT INTO inverted_index values(?,?)", (word_id, parse_word))
+            con.commit() 
+
+    def initialize_db(self):
+        global con 
+        con = lite.connect("dbFile.db")
+        cur = con.cursor()
+        
+        cur.execute("DROP TABLE IF EXISTS lexicon;")
+        cur.execute("CREATE TABLE lexicon(word_id INTEGER, word INTEGER, PRIMARY KEY (word_id));")
+
+        cur.execute("DROP TABLE IF EXISTS document_index;")
+        cur.execute("CREATE TABLE document_index(doc_id INTEGER, url TEXT, PRIMARY KEY (doc_id));")
+
+        cur.execute("DROP TABLE IF EXISTS inverted_index;")
+        cur.execute("CREATE TABLE inverted_index(word_id INTEGER, doc_id INTEGER, PRIMARY KEY (word_id));")
+
+        cur.execute("DROP TABLE IF EXISTS page_rank_score;")
+        cur.execute("CREATE TABLE page_rank_score(doc_id INTEGER, rank_score INTEGER, PRIMARY KEY (doc_id));")
+
+        con.commit()
 
 if __name__ == "__main__":
-    bot = crawler(None, "urls.txt")
+    bot = crawler(None, "test_page1.txt")
     bot.crawl(depth=1)
 
+    
 	
 
