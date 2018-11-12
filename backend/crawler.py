@@ -433,7 +433,7 @@ class crawler(object):
         con.commit()
 
 if __name__ == "__main__":
-    bot = crawler(None, "test_page1.txt")
+    bot = crawler(None, "urls.txt")
     bot.crawl(depth=1)
 
     
