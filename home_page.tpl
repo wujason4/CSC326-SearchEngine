@@ -13,7 +13,7 @@
 
         <h2 id="title">WaWu</h2>
 
-            <form action="/search" method="post">
+            <form action="/search/&page_no=1" method="post">
                 <input id="search_input" type="text" name="keywords">
                 <br>
                 <br>
@@ -27,6 +27,7 @@
             <div id="status">
 			    {{!status}}
             </div>
+    </center>
     <br>
     <br>
 

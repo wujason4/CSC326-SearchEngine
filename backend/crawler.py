@@ -134,9 +134,9 @@ class crawler(object):
         and then returns that newly inserted document's id."""
         global con
         cur = con.cursor()
-        parse_url = "\'"+str(url)+"\'"
+        parse_url = "\'%"+url+"%\'"
 
-        cur.execute("SELECT * FROM document_index WHERE url = " + parse_url)
+        cur.execute("SELECT * FROM document_index WHERE url like ?", (parse_url,))
         data = cur.fetchone()
         if data:
             ret_id = data[0]
@@ -154,8 +154,8 @@ class crawler(object):
         and then returns that newly inserted word's id."""
         global con 
         cur = con.cursor()
-        parse_word = "\'"+str(word)+"\'"
-        cur.execute("SELECT word_id FROM lexicon WHERE word = " + parse_word)
+        parse_word = "\'%"+word+"%\'"
+        cur.execute("SELECT word_id FROM lexicon WHERE word like ?", (parse_word,))
         data = cur.fetchone()
         if data:
             ret_id = data[0]
@@ -352,7 +352,6 @@ class crawler(object):
         self.initialize_db()
 
         while len(self._url_queue):
-
             url, depth_ = self._url_queue.pop()
 
             # skip this url; it's too deep
@@ -408,9 +407,8 @@ class crawler(object):
     def insert_inverted_index(self):
         global con
         cur = con.cursor()
-        for word_id in self._inverted_index_cache:
-            parse_word = "\'"+str(self._inverted_index_cache[word_id])+"\'"
-            cur.execute("INSERT INTO inverted_index values(?,?)", (word_id, parse_word))
+        for word_id,doc_ids in self._inverted_index_cache.items():
+            cur.execute("INSERT INTO inverted_index values(?,?)", (word_id,",".join(str(x) for x in doc_ids)))
             con.commit() 
 
     def initialize_db(self):
@@ -419,7 +417,7 @@ class crawler(object):
         cur = con.cursor()
         
         cur.execute("DROP TABLE IF EXISTS lexicon;")
-        cur.execute("CREATE TABLE lexicon(word_id INTEGER, word INTEGER, PRIMARY KEY (word_id));")
+        cur.execute("CREATE TABLE lexicon(word_id INTEGER, word TEXT, PRIMARY KEY (word_id));")
 
         cur.execute("DROP TABLE IF EXISTS document_index;")
         cur.execute("CREATE TABLE document_index(doc_id INTEGER, url TEXT, PRIMARY KEY (doc_id));")

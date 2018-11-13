@@ -55,9 +55,10 @@
 }
 
 #button:active{
-  background-color: lightgrey;
-  box-shadow: 0 5px #666;
-  transform: translateY(6px);
+	/*background: pink;*/
+	background-color: lightgrey;
+	box-shadow: 0 5px #666;
+	transform: translateY(6px);
 }
 
 #button_login, #button_logout{
@@ -77,7 +78,7 @@
 }
 
 #title{
-	/*background: green;*/
+	/*background: pink;*/
 	vertical-align: top;
 	margin: 0px;
 	margin-top: 10%;
@@ -97,7 +98,7 @@
 #search_table{
 	/*background-color: brown;*/
 	float: left;
-	margin-left: 3%;
+	margin-left: 6%;
 	font-family: 'Open Sans', sans-serif;
 	overflow-y: auto;
 	height: 395px;
@@ -107,9 +108,16 @@
  	/*background-color: purple;*/
  	float: right;
  	margin-right: 6%;
+ 	/*margin-bottom: 5%;*/
  	font-family: 'Open Sans', sans-serif;
  	overflow-y: auto;
  	height: 395px;
+ }
+
+ #url_list{
+ 	/*background-color: orange;*/
+ 	clear: both;
+ 	margin-top: 22%;
  }
 
 /* Style the table */
@@ -134,4 +142,3 @@ tr:hover td{
 tr:nth-child(odd){
 	background-color: lightgrey;
 }
-

@@ -1,0 +1,267 @@
+/* Style the input form */
+#header_container{
+	/*background-color: pink;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	width: 100%;
+	margin-top: 1.5%;
+}
+
+#logo_container{
+	/*background: yellow;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	float: left;
+	text-align: center;
+	margin-left: 1%;
+
+}
+
+#search_container{
+	/*background-color: green;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	margin-top: 1%;
+	margin-left: 3%;
+	width: 35%;
+	float: middle;
+}
+
+#login_container{
+	/*background: red;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	float: right;
+	width: 6%;
+	text-align: center;
+	font-family: 'Open Sans', sans-serif;
+	font-style: bold;
+	font-size: 17px;
+	margin-right: 2%;
+}
+
+#user_table_container{
+	/*background-color: pink;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	width: 100%;
+}
+
+#results_container{
+	/*background-color: pink;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	width: 100%;
+}
+
+#navigation_container{
+	/*background-color: pink;*/
+	/*border-style: solid;*/
+	display: inline-block;
+	width: 100%;
+}
+
+#logo{
+	margin-left: 2%;
+	margin-top: -30%;
+
+}
+
+#search_input{
+	/*background-color: blue;*/
+	box-sizing: border-box;
+	width: 80%;
+	padding: 8px 8px;
+	border-style: solid;
+	border-color: rgba(0, 128, 0, 0.3);
+	border-width: 5px;
+	border-radius: 8px;
+    background-image: url('searchicon.png');
+  	background-position: 10px 10px;
+    background-repeat: no-repeat;
+    padding-left: 40px;
+    font-size: 17px;
+    margin-left: 0%;
+}
+
+#search_button{
+	width: 18%;
+	font-family: 'Open Sans', sans-serif;
+	font-style: bold;
+	font-size: 17px;
+	border-radius: 5px;
+	border-color: lightgrey;
+	border-width: 3px;
+	background-color: rgb(230, 230, 230);
+	box-shadow: 0 2px rgb(110, 110, 110);
+	-webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+    margin-top: 1%;
+    float: right;
+}
+
+#search_button:hover{
+	background-color: lightgrey;
+    color: black;
+}
+
+#search_button:active{
+	background-color: lightgrey;
+	box-shadow: 0 5px #666;
+	transform: translateY(6px);
+}
+
+#button_login, #button_logout{
+	/*background: red;*/
+	width: 100%;
+	font-family: 'Open Sans', sans-serif;
+	font-style: bold;
+	font-size: 17px;
+	border-radius: 5px;
+	border-color: lightgrey;
+	border-width: 3px;
+	background-color: rgb(230, 230, 230);
+	box-shadow: 0 2px rgb(110, 110, 110);
+	-webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+}
+
+#status{
+	/*background: green;*/
+	font-family: 'Open Sans', sans-serif;
+	font-style: bold;
+	font-size: 17px;
+	margin-top: -5%;
+}
+
+#title{
+	/*background: pink;*/
+	color: rgba(0, 128, 0, 0.55);
+	font-size: 20px;
+	font-family: 'Open Sans', sans-serif;
+	margin-left: 2%;
+}
+
+
+.search_table{
+	/*background-color: brown;*/
+	float: left;
+	margin-left: 6%;
+	font-family: 'Open Sans', sans-serif;
+	overflow-y: auto;
+	height: 395px;
+
+}
+
+ .history_table{
+ 	/*background-color: purple;*/
+ 	float: right;
+ 	margin-right: 6%;
+ 	font-family: 'Open Sans', sans-serif;
+ 	overflow-y: auto;
+ 	height: 395px;
+ }
+
+
+/* ================================= */
+/*      Style the Search table       */
+/* ================================= */
+.search_table table, th, td{
+	table-layout: fixed;
+	border: 2px solid black;
+	width: 600px;
+	text-align: center;
+	border-radius: 3px;
+}
+
+.search_table th{
+	background-color: white;
+}
+
+.search_table tr:hover td{
+	background-color: pink;
+}
+
+.search_table tr:nth-child(odd){
+	background-color: mistyrose;
+}
+
+/* ================================= */
+/*      Style the History table      */
+/* ================================= */
+
+.history_table table, th, td{
+	table-layout: fixed;
+	border: 2px solid black;
+	width: 600px;
+	text-align: center;
+	border-radius: 3px;
+}
+
+.history_table th{
+	background-color: white;
+}
+
+.history_table tr:hover td{
+	background-color: pink;
+}
+
+.history_table tr:nth-child(odd){
+	background-color: mistyrose;
+}
+
+/* ================================= */
+/*      Style the Results table      */
+/* ================================= */
+.url_table table, th, td{
+	table-layout: fixed;
+	border: 2px solid black;
+	width: 90%;
+	text-align: center;
+	border-radius: 3px;
+}
+
+.url_table th{
+	background-color: white;
+}
+
+.url_table tr:hover td{
+	background-color: pink;
+}
+
+.url_table tr:nth-child(odd){
+	background-color: mistyrose;
+}
+
+/* ================================= */
+/*   Style the Page Navigation List  */
+/* ================================= */
+
+.nav_list ul {
+    list-style-type: none;
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    /*overflow: hidden;*/
+    /*background-color: #333333;*/
+    background-color: white;
+}
+
+.nav_list li {
+    float: left;
+}
+
+.nav_list li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    padding: 10px;
+    text-decoration: none;
+    font-family: 'Open Sans', sans-serif;
+    font-style: bold;
+    font-size: 17px;
+}
+
+.nav_list li a:hover {
+    background-color: rgba(0, 128, 0, 0.55);
+}

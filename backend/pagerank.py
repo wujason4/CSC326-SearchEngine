@@ -50,7 +50,3 @@ def page_rank(links, num_iterations=20, initial_pr=1.0):
             page_rank[doc_id] = lead + tail
     
     return page_rank
-
-if __name__ == "__main__":
-    print page_rank([(1,2), (2, 4), (4, 3)])
-    print page_rank([(1,2), (2, 4), (4, 3), (3, 1), (3, 2)])

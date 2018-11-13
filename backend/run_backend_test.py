@@ -8,7 +8,7 @@ class TestIndex(unittest.TestCase):
 
     def test_pretty_print(self):
         bot = crawler(None,"test_page.txt")
-        bot.crawl(depth=3)	
+        bot.crawl(depth=1)	
 
         score_list = bot.get_page_rank()
 
