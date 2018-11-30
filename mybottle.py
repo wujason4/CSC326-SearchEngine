@@ -303,10 +303,10 @@ def get_urls(keyword):
 	
 	cur = db.cursor()
 	page_url_score = { }
-	t = "\'%"+keyword+"%\'"
-
+	#t = "\'%"+keyword+"%\'"
 	# Get word_id from lexicon table
-	cur.execute("SELECT word_id FROM lexicon WHERE word like ?",(t,))
+	#cur.execute("SELECT word_id FROM lexicon WHERE word like ?",(t,))
+	cur.execute("SELECT word_id FROM lexicon WHERE word =?",(keyword,))
 	word_id = cur.fetchone()
 
 	# Get all doc_id's from inverted_index table
@@ -330,11 +330,15 @@ def get_urls(keyword):
 		cur.execute("SELECT rank_score FROM page_rank_score WHERE doc_id = ?", (doc_id,))
 		page_rank = cur.fetchone()
 		
+		print "==========566666==========="
+		print url_str
+		print page_rank[0] 
+		print "===========566666=========="
+
 		if page_rank is not None:
 			page_url_score[url_str] = page_rank
 
 	sorted_url_score = sorted(page_url_score.items(), key=operator.itemgetter(1), reverse = True)
-	
 	return sorted_url_score
 
 ##################
