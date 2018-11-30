@@ -209,7 +209,6 @@ def show_results(page_num):
 	print db_URLs
 
 
-
 	##############################	
 	# Create the table!! #
 	##############################
