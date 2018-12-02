@@ -10,22 +10,29 @@ from oauth2client.client import flow_from_clientsecrets
 from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
-############
-#  TO DO:  #
-################################################################
-# - decide whether to store history as DEQUEUE or ORDEREDDICT  #
-################################################################
 
-###################################################################################
-# Temp list for database results:
-# db_URLs = ["http://www.google.ca", "http://www.apple.com", "http://www.facebook.com", "http://www.fakenews.inc"]
-# db_URLs = []
-###################################################################################
 
-#####################
-#  INITIALIZATIONS  #
-#####################
+"""
+###########################
+#      FEATURE TO DO:     #
+###########################
+- toggle button for dark theme
+- add search icon into search bar
+- toggle button to show recent search history
+- spellcheck
+	- can also create a dictionary feature
+- calculator
+- multi-word search
 
+
+"""
+
+
+############################
+#  GLOBAL INITIALIZATIONS  #
+############################
+
+# Backend
 current_status = 'visitor'
 HISTORY_MAX_LENGTH = 20
 SCOPES = ['https://www.googleapis.com/auth/plus.me ','https://www.googleapis.com/auth/userinfo.email']
@@ -39,6 +46,21 @@ session_opts = {
 
 app = SessionMiddleware(app(),session_opts)
 user_searchHistory = collections.OrderedDict()
+
+
+# Frontend
+# final_table = None
+history_table = None
+url_table = None
+nav_table = None
+page_no_urls = {}
+MAX_PAGES = 1
+
+
+
+############################
+#          ROUTING         #
+############################
 
 # Home Page
 @route('/',method=['GET','POST'])
@@ -63,15 +85,191 @@ def home_page():
 	return template('home_page', logging = log_arg, status = status_arg, picture=pic)
 
 
-# Static CSS file for the home_page table
+@route('/search', defaults={'page_num', 1})
+@route('/search/&page_no=<page_num:int>' or '/search/%26page_no%3D<page_num:int>', method=['GET', 'POST'])
+def show_results(page_num):
+
+	history = collections.OrderedDict()
+	session = request.environ.get('beaker.session')
+	user_email = session['user_email'] if 'user_email' in session else ''
+	global current_status, logout, login 
+	if user_email not in user_searchHistory:
+		user_searchHistory[user_email] = collections.OrderedDict()
+	
+	# If logged in, use the history from user_searchHistory and add to that
+	# Else, reset history 
+	if current_status != 'visitor':
+		user_history = user_searchHistory[user_email]
+	else:
+		visitor_history = collections.OrderedDict()
+
+	# Get the search string
+	query_string = request.forms.get('keywords')
+
+	# Make sure only modifying global variables
+	# global final_table
+	global history_table
+	global url_table
+	global nav_table
+	global page_no_urls
+	global MAX_PAGES
+
+
+	# Check if new search query
+	if not query_string:
+		db_URLs = []
+
+		for url, pg in page_no_urls.items():
+			if pg == page_num:
+				db_URLs.append(url)
+
+
+		#############################	
+		#     Create the table!!    #
+		#############################
+		
+		# 1) Style the table firsts
+		url_table = "<table class=\"url_table\">"
+		
+		# 2) Add the table heading
+		url_table += "<thead><tr><th colspan=\"2\">Result URLs</th></tr><tr><td>Link #</td><td>URL</td></tr></thead><tbody>"
+		url_table = fill_URL_table(db_URLs, page_num)
+
+		# 3) Add table contents
+		nav_table = fill_pagination(page_num, MAX_PAGES)
+
+		# Check login status
+		login = "<form action=\"/login\" method=\"get\"><input id=\"button_login\" type=\"submit\" value=\"login\"/></form>"
+		logout = "<form action=\"/logout\" method=\"get\"><input id=\"button_logout\" type=\"submit\" value=\"logout\"/></form>"
+		status_arg = "<p>status: %s</p>" % current_status
+
+		if current_status != 'visitor':
+			log_arg = logout
+		else:
+			log_arg = login
+
+		return template('page_no', logging=log_arg, status=status_arg, h_table=history_table, db_from=url_table, n_table=nav_table, page_num=page_num)
+
+
+	# NEW SEARCH
+	elif query_string:
+
+		# Set global variables back to default
+		final_table = None
+		history_table = None
+		url_table = None
+		nav_table = None
+		page_no_urls = {}
+		MAX_PAGES = 1
+	
+		# Initialize the dictionary of unique words
+		keyword_set = dict()
+		checked = []
+
+		# Extract whole words from the search string, may include repeats
+		# **Should return ['word1', 'word2', 'word3']
+		string = query_string.split()
+		
+		# Extract all unique words and store with count
+		for word in string:
+
+			regex = r"\b" + re.escape(word) + r"\b"
+			count = sum(1 for match in re.finditer(regex, query_string))
+
+			if word not in keyword_set:
+				keyword_set[word] = count
+					
+		if current_status != 'visitor':
+			sorted_history = sort_search(user_history, keyword_set)
+		else:
+			sorted_history = sort_search(visitor_history,keyword_set)
+
+		
+		####################
+		#   Get the URLs   #
+		####################
+
+		# Extract first word searched
+		first_word = string[0]
+
+		# Get all URLs from DB
+		urls = get_urls(first_word)
+
+		# Group URLs into its corresponding page number
+		count = 0
+		for url in urls:
+			if count == 5:
+				MAX_PAGES += 1
+				count = 0
+
+			page_no_urls[url[0]] = MAX_PAGES
+			count += 1
+
+
+		# Get URLs specific for the requested page number
+		db_URLs = []
+		for url, pg in page_no_urls.items():
+			if pg == page_num:
+				db_URLs.append(url)
+
+
+		########################	
+		#   Create the table   #
+		########################
+
+		# 1) Style the table firsts
+		# final_table = "<table class=\"user_table\">"
+		history_table = "<table class=\"user_table\">"
+		url_table = "<table class=\"url_table\">"
+		
+		# 2) Add the table heading
+		# final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>".format(query_string)
+		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
+		url_table += "<thead><tr><th colspan=\"2\">Result URLs</th></tr><tr><td>Link #</td><td>URL</td></tr></thead><tbody>"
+		
+		# 3) Add table contents
+		history_table = fill_table(history_table, url_table, sorted_history, keyword_set)
+		url_table = fill_URL_table(db_URLs, page_num)
+		nav_table = fill_pagination(page_num, MAX_PAGES)
+
+
+		# 4) Check login status
+		login = "<form action=\"/login\" method=\"get\"><input id=\"button_login\" type=\"submit\" value=\"login\"/></form>"
+		logout = "<form action=\"/logout\" method=\"get\"><input id=\"button_logout\" type=\"submit\" value=\"logout\"/></form>"
+		status_arg = "<p>status: %s</p>" % current_status
+
+		if current_status != 'visitor':
+			log_arg = logout
+		else:
+			log_arg = login
+
+
+		return template('page_no', logging=log_arg, status=status_arg, h_table=history_table, db_from=url_table, n_table=nav_table, page_num=page_num)
+
+
+
+##########################
+#   Serve static files   #
+##########################
+@route('/images/<filename>')
+def server_static_images(filename):
+    return static_file(filename, root='./images')
+
 @route('/static/<filename>')
-def server_static(filename):
-    return static_file(filename, root='./')
+def server_static_css(filename):
+	return static_file(filename, root='./static')
+
+# @route('/template/<filename>')
+# def server_static_templates(filename):
+# 	return static_file(filename, root='./template')
 
 
+
+##################
+#   USER LOGIN   #
+##################
 @route('/login','GET')
 def login():
-	print "signing in"
 	global current_status
 	current_status = 'user'
 	session = request.environ.get('beaker.session')
@@ -119,131 +317,13 @@ def redirect_page():
 	redirect('/')
 
 
-@post('/search/&page_no=<page_num:int>')
-def show_results(page_num):
-	global db_URLs
 
-	history = collections.OrderedDict()
-	session = request.environ.get('beaker.session')
-	user_email = session['user_email'] if 'user_email' in session else ''
-	global current_status, logout, login 
-	if user_email not in user_searchHistory:
-		user_searchHistory[user_email] = collections.OrderedDict()
-	
-	# If logged in, use the history from user_searchHistory and add to that
-	# Else, reset history 
-	if current_status != 'visitor':
-		user_history = user_searchHistory[user_email]
-	else:
-		visitor_history = collections.OrderedDict()
-
-	# Get the search string
-	original_string = request.forms.get('keywords')
-	
-	# Initialize the dictionary of unique words
-	keyword_set = dict()
-	checked = []
-
-	# Extract whole words from the search string, may include repeats
-	# **Should return ['word1', 'word2', 'word3']
-
-	string = original_string.split()
-	
-	# Extract all unique words and store with count
-	for word in string:
-
-		regex = r"\b" + re.escape(word) + r"\b"
-		count = sum(1 for match in re.finditer(regex, original_string))
-
-		if word not in keyword_set:
-			keyword_set[word] = count
-				
-	if current_status != 'visitor':
-		sorted_history = sort_search(user_history, keyword_set)
-	else:
-		sorted_history = sort_search(visitor_history,keyword_set)
-
-	###################
-	# Get the URLs
-	###################
-
-	# Extract first word searched
-	first_word = string[0]
-
-	# Call helper function to get all URLs
-	urls = get_urls(first_word)
-
-	for url in urls:
-		print url
-	print "==================type: ", type(urls)
-
-	# Divide the URLs into page numbers
-	page_no_urls = {}
-	count = 0
-	pg_num = 1
-
-
-	for url in urls:
-		if count == 5:
-			pg_num += 1
-
-		page_no_urls[url[0]] = pg_num
-		count += 1
-
-	print "\n\n DEBUG PRINT"
-	for url, pg in page_no_urls.items():
-		print url, pg
-	# print page_no_urls
-	print "SEARCHED WORD IS: ", first_word
-
-	print "\n\nPAGE NUM IS: ", page_num
-	# print "=================="
-
-
-	db_URLs = []
-
-	for url, pg in page_no_urls.items():
-		if pg == page_num:
-			db_URLs.append(url)
-
-	print db_URLs
-
-
-	##############################	
-	# Create the table!! #
-	##############################
-	# 1) Style the table firsts
-	final_table = "<table class=\"user_table\">"
-	history_table = "<table class=\"user_table\">"
-	url_table = "<table class=\"url_table\">"
-
-	# Extra for navigation list
-	nav_table = "<ul>"
-	for i in range(page_num):
-		nav_table += "<li><a href=\"/search/&page_no={}\"> 1 </a></li>".format(i+1)
-	nav_table += "</ul>"
-	
-	# 2) Add the table heading
-	final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>".format(original_string)
-	history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
-	url_table += "<thead><tr><th colspan=\"2\">Result URLs</th></tr><tr><td>Link #</td><td>URL</td></tr></thead><tbody>"
-	final_table, history_table, url_table = create_table(final_table, history_table, url_table, sorted_history, keyword_set, db_URLs)
-	
-	login = "<form action=\"/login\" method=\"get\"><input id=\"button_login\" type=\"submit\" value=\"login\"/></form>"
-	logout = "<form action=\"/logout\" method=\"get\"><input id=\"button_logout\" type=\"submit\" value=\"logout\"/></form>"
-	status_arg = "<p>status: %s</p>" % current_status
-
-	if current_status != 'visitor':
-		log_arg = logout
-	else:
-		log_arg = login
-
-	return template('search', logging=log_arg, status=status_arg, s_table=final_table, h_table=history_table, db_from=url_table, n_table=nav_table)
-
-
+############################
+#     HELPER FUNCTIONS     #
+############################
 
 def sort_search(history, keyword_set):
-# For every unique searched word
+	# For every unique searched word
 	for s_word, s_count in keyword_set.items():
 
 		# Check if word already in history
@@ -274,27 +354,68 @@ def sort_search(history, keyword_set):
 	sorted_history = collections.OrderedDict(sorted(history.iteritems(), key=lambda (k,v): (v,k), reverse=True))
 	return sorted_history
 
-def create_table(final_table, history_table, url_table, sorted_history, keyword_set, db_URLs):
+
+def fill_table(history_table, url_table, sorted_history, keyword_set):
 
 	# Add table data for search
-	for i in keyword_set:
-		final_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(i, keyword_set[i])
+	# for i in keyword_set:
+	# 	final_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(i, keyword_set[i])
 
 	# Add table data for history
 	for key, value in sorted_history.iteritems():
 		history_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(key, value)
 
+
+	# Close off the table
+	# final_table += "</tbody></table>"
+	history_table += "</tbody></table>"
+
+	return history_table
+
+
+def fill_URL_table(db_URLs, page_num):
+	
+	global url_table
+
 	# Add table data for URLs
 	for index, url in enumerate(db_URLs):
 		url_table += "<tr><td>{}</td><td><a href=\"{}\">{}</a></td></tr>\n".format(index+1, url, url)
 
-
-	#Close off the table
-	final_table += "</tbody></table>"
-	history_table += "</tbody></table>"
+	# Close off the table
 	url_table += "</tbody></table>"
 
-	return final_table, history_table, url_table
+	return url_table
+
+
+def fill_pagination(page_num, MAX_PAGES):
+
+	# Create list header
+	nav_table = "<ul>"
+
+	# Add "Prev" button
+	if page_num > 1:
+		nav_table += "<li><a href=\"/search/&page_no={}\"> Prev </a></li>".format(page_num - 1)
+	else:
+		nav_table += "<li><a href=\"/search/&page_no={}\"> Prev </a></li>".format(1)
+
+	# Add page numbers
+	for i in range(MAX_PAGES):
+		if i+1 == page_num:
+			nav_table += "<li style=\"background-color:rgba(0, 128, 0, 0.55)\"><a href=\"/search/&page_no={}\"> {} </a></li>".format(i+1, i+1)
+		else:
+			nav_table += "<li><a href=\"/search/&page_no={}\"> {} </a></li>".format(i+1, i+1)
+	
+	# Add "Next" button
+	if page_num < MAX_PAGES:
+		nav_table += "<li><a href=\"/search/&page_no={}\"> Next </a></li>".format(page_num + 1)
+	else:
+		nav_table += "<li><a href=\"/search/&page_no={}\"> Next </a></li>".format(MAX_PAGES)
+
+	# Close list
+	nav_table += "</ul>"
+
+	return nav_table
+
 
 def get_urls(keyword):
 
@@ -303,9 +424,6 @@ def get_urls(keyword):
 	
 	cur = db.cursor()
 	page_url_score = { }
-	#t = "\'%"+keyword+"%\'"
-	# Get word_id from lexicon table
-	#cur.execute("SELECT word_id FROM lexicon WHERE word like ?",(t,))
 	cur.execute("SELECT word_id FROM lexicon WHERE word =?",(keyword,))
 	word_id = cur.fetchone()
 
@@ -329,11 +447,6 @@ def get_urls(keyword):
 		# Get page rank score for each URL
 		cur.execute("SELECT rank_score FROM page_rank_score WHERE doc_id = ?", (doc_id,))
 		page_rank = cur.fetchone()
-		
-		print "==========566666==========="
-		print url_str
-		print page_rank[0] 
-		print "===========566666=========="
 
 		if page_rank is not None:
 			page_url_score[url_str] = page_rank
@@ -341,16 +454,17 @@ def get_urls(keyword):
 	sorted_url_score = sorted(page_url_score.items(), key=operator.itemgetter(1), reverse = True)
 	return sorted_url_score
 
-##################
-# ERROR HANDLING #
-##################
+
+#################
+#ERROR HANDLING #
+#################
 @error(404)
 def error_handler_404(error):
 	pic = 'logo.png'
 	return template('error_handler')
 
 @error(500)
-def error_handler_404(error):
+def error_handler_500(error):
 	pic = 'logo.png'
 	return template('error_handler')
 

@@ -2,13 +2,13 @@
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="/static/search.css">
+    <link rel="stylesheet" href="/static/home_page.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <title>WaWu Search</title>
 </head>
 
 <body>
-    <img id="logo" src="/static/logo.png" height="120" width="180">
+    <a href="/"><img id="logo" src="/images/logo.png" height="120" width="180"></a>
     <div id="main_container">
 
         <h2 id="title">
@@ -35,7 +35,7 @@
         <br>
 
         <center>
-            <img src="/static/error.png" height="519" width="546">
+            <img src="/images/error.png" height="519" width="546">
         </center>
             
     </div>
