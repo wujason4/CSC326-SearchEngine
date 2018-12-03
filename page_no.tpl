@@ -4,6 +4,7 @@
 <head>
     <link rel="stylesheet" href="/static/results.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <script src="/scripts/toggle.js"></script>
     <title>WaWu Search</title>
 </head>
 
@@ -39,6 +40,17 @@
 
     <!-- <h1>THIS IS PAGE {{page_num}}</h1> -->
     
+    <div id="history_toggle" style="font-family: 'Open Sans', sans-serif">
+        <form onclick='myFunction()'>
+            History <input id="history_checkbox" type="checkbox"/>
+        </form>
+    </div>
+    
+
+
+    
+    <!-- <button onclick="myFunction()">History</button> -->
+      
     <div id="user_table_container">
 
         <div class="history_table">
@@ -46,8 +58,10 @@
         </div>
     </div>
 
-    <br>
-    <br>
+
+    
+
+
     
 
 

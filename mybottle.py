@@ -53,6 +53,10 @@ url_table = None
 nav_table = None
 page_no_urls = collections.OrderedDict()
 MAX_PAGES = 1
+darkmode = False
+home_page_theme = "<link rel=\"stylesheet\" href=\"/static/home_page.css\">"
+home_page_dark_theme = "<link rel=\"stylesheet\" href=\"/static/home_page_dark.css\">"
+
 
 
 
@@ -130,7 +134,7 @@ def show_results(page_num):
 		url_table = "<table class=\"url_table\">"
 		
 		# 2) Add the table heading
-		url_table += "<thead><tr><th colspan=\"2\">Result URLs</th></tr><tr><td>Link #</td><td>URL</td></tr></thead><tbody>"
+		url_table += "<thead><tr><th>Results</th></tr></thead><tbody>"
 		url_table = fill_URL_table(db_URLs, page_num)
 
 		# 3) Add table contents
@@ -241,15 +245,14 @@ def show_results(page_num):
 		########################
 
 		# 1) Style the table firsts
-		# final_table = "<table class=\"user_table\">"
 		history_table = "<table class=\"user_table\">"
 		url_table = "<table class=\"url_table\">"
 		
 		# 2) Add the table heading
-		# final_table += "<thead><tr><th colspan=\"2\">Searched for: <i>\"{}\"</i></th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>".format(query_string)
 		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
-		url_table += "<thead><tr><th colspan=\"2\">Result URLs</th></tr><tr><td>Link #</td><td>URL</td></tr></thead><tbody>"
-		
+		url_table += "<thead><tr><th>Results</th></tr></thead><tbody>"
+
+
 		# 3) Add table contents
 		history_table = fill_table(history_table, url_table, sorted_history, keyword_set)
 		url_table = fill_URL_table(db_URLs, page_num)
@@ -286,6 +289,9 @@ def server_static_css(filename):
 # def server_static_templates(filename):
 # 	return static_file(filename, root='./template')
 
+@route('/scripts/<filename>')
+def server_static_js(filename):
+	return static_file(filename, root='./scripts')
 
 
 ##################
@@ -390,7 +396,6 @@ def fill_table(history_table, url_table, sorted_history, keyword_set):
 
 
 	# Close off the table
-	# final_table += "</tbody></table>"
 	history_table += "</tbody></table>"
 
 	return history_table
@@ -402,7 +407,7 @@ def fill_URL_table(db_URLs, page_num):
 
 	# Add table data for URLs
 	for index, url in enumerate(db_URLs):
-		url_table += "<tr><td>{}</td><td><a href=\"{}\">{}</a></td></tr>\n".format(index+1, url, url)
+		url_table += "<tr><td><a href=\"{}\">{}</a></td></tr>\n".format(url, url)
 
 	# Close off the table
 	url_table += "</tbody></table>"
