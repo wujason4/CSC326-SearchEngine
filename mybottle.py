@@ -11,19 +11,17 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
 
-
 """
 ###########################
 #      FEATURE TO DO:     #
 ###########################
 - toggle button for dark theme
-- add search icon into search bar
+DONE- add search icon into search bar
 - toggle button to show recent search history
 - spellcheck
 	- can also create a dictionary feature
 - calculator
-- multi-word search
-
+DONE- multi-word search 
 
 """
 
@@ -53,7 +51,7 @@ user_searchHistory = collections.OrderedDict()
 history_table = None
 url_table = None
 nav_table = None
-page_no_urls = {}
+page_no_urls = collections.OrderedDict()
 MAX_PAGES = 1
 
 
@@ -159,7 +157,7 @@ def show_results(page_num):
 		history_table = None
 		url_table = None
 		nav_table = None
-		page_no_urls = {}
+		page_no_urls = collections.OrderedDict()
 		MAX_PAGES = 1
 	
 		# Initialize the dictionary of unique words
@@ -189,28 +187,33 @@ def show_results(page_num):
 		#   Get the URLs   #
 		####################
 
-		"""
-		# Extract first word searched
-		first_word = string[0]
 
-		# Get all URLs from DB
-		urls = get_urls(first_word)
-		"""
 
 		# Find all the common urls for multiple searched word
 		list_of_urls = []
 		common_urls = set()
-		for word in keyword_set:
-			urls = get_urls(word)
-			for u in urls:
-				list_of_urls.append(u)
 		
-		for s in range(0,len(list_of_urls)):
-			for x in range (s+1,len(list_of_urls)):
-				if list_of_urls[s]==list_of_urls[x]:
-					common_urls.add(list_of_urls[s])
+		if len(keyword_set) ==1:
 
-		common_urls = list(common_urls)
+			# Extract first word searched
+			first_word = string[0]
+
+			# Get all URLs from DB
+			common_urls = get_urls(first_word)
+
+		if len(keyword_set) > 1:
+
+			for word in keyword_set:
+				urls = get_urls(word)
+				for u in urls:
+					list_of_urls.append(u)
+			
+			for s in range(0,len(list_of_urls)):
+				for x in range (s+1,len(list_of_urls)):
+					if list_of_urls[s]==list_of_urls[x]:
+						common_urls.add(list_of_urls[s])
+
+			common_urls = list(common_urls)
 
 		sorted_common_urls = sorted(common_urls, key=operator.itemgetter(1), reverse = True)
 		
@@ -488,42 +491,6 @@ def error_handler_404(error):
 def error_handler_500(error):
 	pic = 'logo.png'
 	return template('error_handler')
-
-####################
-#MULTI WORD SEARCH #
-####################
-def multi_word_search(keyword_set):
-	# Load the DB
-	db = lite.connect("backend/dbFile.db")
-	
-	cur = db.cursor()
-	info_list = []
-	for word in keyword_set:
-		cur.execute("SELECT word_id FROM lexicon WHERE word =?",(word,))
-		word_id = cur.fetchone()
-
-		# Get all doc_id's from inverted_index table
-		cur.execute("SELECT doc_id FROM inverted_index WHERE word_id = ?", (word_id[0],))
-		doc_id_list = cur.fetchone()
-
-		"""
-		cur.execute("DROP TABLE IF EXISTS lexicon;")
-        cur.execute("CREATE TABLE lexicon(word_id INTEGER, word TEXT, PRIMARY KEY (word_id));")
-		"""
-		# Convert list into string
-		doc_id_list_string = str(doc_id_list[0])
-		
-		for doc_id in doc_id_list_string.split(","):
-			cur.execute("SELECT doc_id,rank_score FROM page_rank_score WHERE doc_id = ?", (doc_id,))
-			info = cur.fetchone()
-			if info:
-				info_list.append(info)
-			
-			
-
-		#cur.execute("CREATE TABLE doc_score AS SELECT document_index.doc_id, page_rank_score.rank_score FROM document_index INNER JOIN page_rank_score ON document_index.doc_id = page_rank_score.doc_id;")
-		
-
 
 
 # Local run
