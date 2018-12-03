@@ -158,8 +158,13 @@
  	float: right;
  	margin-right: 6%;
  	font-family: 'Open Sans', sans-serif;
+ 	font-size: 12px;
  	overflow-y: auto;
  	height: 395px;
+ }
+
+ .url_table{
+ 	font-family: 'Open Sans', sans-serif;
  }
 
 
@@ -192,7 +197,7 @@
 
 .history_table table, th, td{
 	table-layout: fixed;
-	border: 2px solid black;
+	/*border: 2px solid black;*/
 	width: 600px;
 	text-align: center;
 	border-radius: 3px;
@@ -211,14 +216,15 @@
 }
 
 /* ================================= */
-/*      Style the Results table      */
+/*      Style the URL table      */
 /* ================================= */
 .url_table table, th, td{
 	table-layout: fixed;
-	border: 2px solid black;
+	/*border: 1px solid black;*/
 	width: 90%;
 	text-align: center;
 	border-radius: 3px;
+	padding: 1%;
 }
 
 .url_table th{
@@ -265,3 +271,4 @@
 .nav_list li a:hover {
     background-color: rgba(0, 128, 0, 0.55);
 }
+

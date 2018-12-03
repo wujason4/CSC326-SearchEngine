@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="/static/home_page.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <title>WaWu Search</title>
+
 </head>
 
 <body>
@@ -28,9 +29,16 @@
 			    {{!status}}
             </div>
     </center>
+    <center>
+        <form action="/dark" method="post">
+            <label class="lightsoff_toggle">
+                <input type="checkbox">
+                <span class="slider round"></span>
+            </label>
+        </form>
+    </center>
     <br>
     <br>
-
  
 </body>
 </html>
