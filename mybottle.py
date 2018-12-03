@@ -178,7 +178,7 @@ def show_results(page_num):
 
 			if word not in keyword_set:
 				keyword_set[word] = count
-					
+
 		if current_status != 'visitor':
 			sorted_history = sort_search(user_history, keyword_set)
 		else:
@@ -189,26 +189,46 @@ def show_results(page_num):
 		#   Get the URLs   #
 		####################
 
+		"""
 		# Extract first word searched
 		first_word = string[0]
 
 		# Get all URLs from DB
 		urls = get_urls(first_word)
+		"""
 
+		# Find all the common urls for multiple searched word
+		list_of_urls = []
+		common_urls = set()
+		for word in keyword_set:
+			urls = get_urls(word)
+			for u in urls:
+				list_of_urls.append(u)
+		
+		for s in range(0,len(list_of_urls)):
+			for x in range (s+1,len(list_of_urls)):
+				if list_of_urls[s]==list_of_urls[x]:
+					common_urls.add(list_of_urls[s])
+
+		common_urls = list(common_urls)
+
+		sorted_common_urls = sorted(common_urls, key=operator.itemgetter(1), reverse = True)
+		
 		# Group URLs into its corresponding page number
 		count = 0
-		for url in urls:
+		for url in sorted_common_urls:
 			if count == 5:
 				MAX_PAGES += 1
 				count = 0
-
 			page_no_urls[url[0]] = MAX_PAGES
 			count += 1
 
-
 		# Get URLs specific for the requested page number
 		db_URLs = []
+		print "------------------------"
 		for url, pg in page_no_urls.items():
+			
+			print url
 			if pg == page_num:
 				db_URLs.append(url)
 
@@ -449,9 +469,10 @@ def get_urls(keyword):
 		page_rank = cur.fetchone()
 
 		if page_rank is not None:
-			page_url_score[url_str] = page_rank
+			page_url_score[url_str] = page_rank[0]
 
 	sorted_url_score = sorted(page_url_score.items(), key=operator.itemgetter(1), reverse = True)
+
 	return sorted_url_score
 
 
@@ -467,6 +488,41 @@ def error_handler_404(error):
 def error_handler_500(error):
 	pic = 'logo.png'
 	return template('error_handler')
+
+####################
+#MULTI WORD SEARCH #
+####################
+def multi_word_search(keyword_set):
+	# Load the DB
+	db = lite.connect("backend/dbFile.db")
+	
+	cur = db.cursor()
+	info_list = []
+	for word in keyword_set:
+		cur.execute("SELECT word_id FROM lexicon WHERE word =?",(word,))
+		word_id = cur.fetchone()
+
+		# Get all doc_id's from inverted_index table
+		cur.execute("SELECT doc_id FROM inverted_index WHERE word_id = ?", (word_id[0],))
+		doc_id_list = cur.fetchone()
+
+		"""
+		cur.execute("DROP TABLE IF EXISTS lexicon;")
+        cur.execute("CREATE TABLE lexicon(word_id INTEGER, word TEXT, PRIMARY KEY (word_id));")
+		"""
+		# Convert list into string
+		doc_id_list_string = str(doc_id_list[0])
+		
+		for doc_id in doc_id_list_string.split(","):
+			cur.execute("SELECT doc_id,rank_score FROM page_rank_score WHERE doc_id = ?", (doc_id,))
+			info = cur.fetchone()
+			if info:
+				info_list.append(info)
+			
+			
+
+		#cur.execute("CREATE TABLE doc_score AS SELECT document_index.doc_id, page_rank_score.rank_score FROM document_index INNER JOIN page_rank_score ON document_index.doc_id = page_rank_score.doc_id;")
+		
 
 
 
