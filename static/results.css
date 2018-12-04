@@ -5,6 +5,7 @@
 	display: inline-block;
 	width: 100%;
 	margin-top: 1.5%;
+	margin-bottom: 3%;
 }
 
 #logo_container{
@@ -41,17 +42,21 @@
 }
 
 #user_table_container{
-	/*background-color: pink;*/
+	/*background-color: grey;*/
 	/*border-style: solid;*/
 	display: inline-block;
-	width: 100%;
+	width: 30%;
+	display: none;
+	float: right;
+	height: 395px;
 }
 
 #results_container{
-	/*background-color: pink;*/
+	/*background-color: yellow;*/
 	/*border-style: solid;*/
 	display: inline-block;
-	width: 100%;
+	width: 65%;
+	height: 395px;
 }
 
 #navigation_container{
@@ -76,9 +81,6 @@
 	border-color: rgba(0, 128, 0, 0.3);
 	border-width: 5px;
 	border-radius: 8px;
-    background-image: url('http:localhost:8080/images/errpr.png');
-  	background-position: 10px 10px;
-    background-repeat: no-repeat;
     padding-left: 40px;
     font-size: 17px;
     margin-left: 0%;
@@ -142,69 +144,64 @@
 	margin-left: 2%;
 }
 
+#history_toggle_container{
+	/*background: green;*/
+	/*clear: both;*/
+	display: inline-block;
+	width: 6%;
+	float: right;
+	margin-right: 0.7%;
+}
 
-.search_table{
-	/*background-color: brown;*/
-	float: left;
-	margin-left: 6%;
+#history_toggle_label{
+	/*background: brown;*/
 	font-family: 'Open Sans', sans-serif;
-	overflow-y: auto;
-	height: 395px;
-
+	font-size: 20px;
+	width: 64%;
+	float: left;
+	margin-right: 0%;
+	margin-left: 5%;
 }
 
- .history_table{
- 	/*background-color: purple;*/
- 	float: right;
- 	margin-right: 6%;
- 	font-family: 'Open Sans', sans-serif;
- 	font-size: 12px;
- 	overflow-y: auto;
- 	height: 395px;
- }
-
- .url_table{
- 	font-family: 'Open Sans', sans-serif;
- }
-
-
-/* ================================= */
-/*      Style the Search table       */
-/* ================================= */
-.search_table table, th, td{
-	table-layout: fixed;
-	border: 2px solid black;
-	width: 600px;
-	text-align: center;
-	border-radius: 3px;
+#history_toggle{
+	/*background: yellow;*/
+	/*transform: scale(1.3);*/
+	width: 10%;
+	margin-top: 3%;
+	margin-right: 21%;
+	float: right;
 }
 
-.search_table th{
-	background-color: white;
-}
 
-.search_table tr:hover td{
-	background-color: pink;
-}
-
-.search_table tr:nth-child(odd){
-	background-color: mistyrose;
-}
 
 /* ================================= */
 /*      Style the History table      */
 /* ================================= */
+.history_table{
+	/*background: grey;*/
+	font-family: 'Open Sans', sans-serif;
+	font-size: 14px;
+	overflow-y: auto;
+	width: 100%;
+	height: 395px;
+}
 
 .history_table table, th, td{
 	table-layout: fixed;
-	/*border: 2px solid black;*/
-	width: 600px;
-	text-align: center;
-	border-radius: 3px;
+	text-align: left;
+	padding: 2%;
+	width: 99%;
 }
 
 .history_table th{
 	background-color: white;
+	border: 2px solid black;
+	border-radius: 4px;
+}
+
+.history_table td{
+	border: 2px solid black;
+	border-radius: 4px;
 }
 
 .history_table tr:hover td{
@@ -218,17 +215,26 @@
 /* ================================= */
 /*      Style the URL table      */
 /* ================================= */
+.url_table{
+	font-family: 'Open Sans', sans-serif;
+	width: 99%;
+}
+
 .url_table table, th, td{
 	table-layout: fixed;
-	/*border: 1px solid black;*/
-	width: 90%;
-	text-align: center;
-	border-radius: 3px;
+	text-align: left;
 	padding: 1%;
 }
 
 .url_table th{
 	background-color: white;
+	border: 2px solid black;
+	border-radius: 4px;
+}
+
+.url_table td{
+	border: 2px solid black;
+	border-radius: 4px;
 }
 
 .url_table tr:hover td{

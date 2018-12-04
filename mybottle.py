@@ -17,15 +17,11 @@ from googleapiclient.discovery import build
 #      FEATURE TO DO:     #
 ###########################
 - toggle button for dark theme
-- toggle button to show recent search history
 - spellcheck
 	- can also create a dictionary feature
 - calculator
-- multi-word search
-
 
 """
-
 
 ############################
 #  GLOBAL INITIALIZATIONS  #
@@ -52,6 +48,7 @@ user_searchHistory = collections.OrderedDict()
 history_table = None
 url_table = None
 nav_table = None
+sorted_history = []
 page_no_urls = collections.OrderedDict()
 MAX_PAGES = 1
 darkmode = False
@@ -103,8 +100,6 @@ def show_results(page_num):
 	# Else, reset history 
 	if current_status != 'visitor':
 		user_history = user_searchHistory[user_email]
-	else:
-		visitor_history = collections.OrderedDict()
 
 	# Get the search string
 	query_string = request.forms.get('keywords')
@@ -114,6 +109,7 @@ def show_results(page_num):
 	global history_table
 	global url_table
 	global nav_table
+	global sorted_history
 	global page_no_urls
 	global MAX_PAGES
 
@@ -172,20 +168,23 @@ def show_results(page_num):
 		# Extract whole words from the search string, may include repeats
 		# **Should return ['word1', 'word2', 'word3']
 		string = query_string.split()
-		
-		# Extract all unique words and store with count
-		for word in string:
 
-			regex = r"\b" + re.escape(word) + r"\b"
-			count = sum(1 for match in re.finditer(regex, query_string))
-
-			if word not in keyword_set:
-				keyword_set[word] = count
-					
 		if current_status != 'visitor':
-			sorted_history = sort_search(user_history, keyword_set)
-		else:
-			sorted_history = sort_search(visitor_history,keyword_set)
+			sorted_history.append(query_string)
+		
+		# # Extract all unique words and store with count
+		# for word in string:
+
+		# 	regex = r"\b" + re.escape(word) + r"\b"
+		# 	count = sum(1 for match in re.finditer(regex, query_string))
+
+		# 	if word not in keyword_set:
+		# 		keyword_set[word] = count
+					
+		# if current_status != 'visitor':
+		# 	sorted_history = sort_search(user_history, keyword_set)
+		# else:
+		# 	sorted_history = sort_search(visitor_history,keyword_set)
 
 		
 		####################
@@ -221,16 +220,16 @@ def show_results(page_num):
 		########################
 
 		# 1) Style the table firsts
-		history_table = "<table class=\"user_table\">"
+		history_table = "<table class=\"history_table\">"
 		url_table = "<table class=\"url_table\">"
 		
 		# 2) Add the table heading
-		history_table += "<thead><tr><th colspan=\"2\">Top 20 Searched</th></tr><tr><td>Word</td><td>Count</td></tr></thead><tbody>"
+		history_table += "<thead><tr><th>Recently Searched</th></tr></thead><tbody>"
 		url_table += "<thead><tr><th>Results</th></tr></thead><tbody>"
 
 
 		# 3) Add table contents
-		history_table = fill_table(history_table, url_table, sorted_history, keyword_set)
+		history_table = fill_history_table(history_table, sorted_history)
 		url_table = fill_URL_table(db_URLs, page_num)
 		nav_table = fill_pagination(page_num, MAX_PAGES)
 
@@ -244,6 +243,7 @@ def show_results(page_num):
 			log_arg = logout
 		else:
 			log_arg = login
+			history_table = "<h3 style=\"font-size:12px\">Please login to see search history!</h3>"
 
 
 		return template('page_no', logging=log_arg, status=status_arg, h_table=history_table, db_from=url_table, n_table=nav_table, page_num=page_num)
@@ -327,49 +327,11 @@ def redirect_page():
 #     HELPER FUNCTIONS     #
 ############################
 
-def sort_search(history, keyword_set):
-	# For every unique searched word
-	for s_word, s_count in keyword_set.items():
-
-		# Check if word already in history
-		if s_word in history:
-			history[s_word] += s_count
-		
-		# word not in history, delete an entry from history and add new word
-		else:
-
-			# Check if user history has reached max length
-			if len(history) < HISTORY_MAX_LENGTH:
-				history[s_word] = s_count
-
-			else:
-				min_searched_count = min(history.values())
-
-				# Delete min searched word
-				for h_word, h_count in history.items():
-
-					if h_count == min_searched_count:
-						del history[h_word]
-						break
-
-				# Add newly searched to user history
-				history[s_word] = s_count
-
-	# Sort histrory in DESCENDING order
-	sorted_history = collections.OrderedDict(sorted(history.iteritems(), key=lambda (k,v): (v,k), reverse=True))
-	return sorted_history
-
-
-def fill_table(history_table, url_table, sorted_history, keyword_set):
-
-	# Add table data for search
-	# for i in keyword_set:
-	# 	final_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(i, keyword_set[i])
+def fill_history_table(history_table, sorted_history):
 
 	# Add table data for history
-	for key, value in sorted_history.iteritems():
-		history_table += "<tr><td>{}</td><td>{}</td></tr>\n".format(key, value)
-
+	for query in reversed(sorted_history):
+		history_table += "<tr><td>{}</td></tr>\n".format(query)
 
 	# Close off the table
 	history_table += "</tbody></table>"

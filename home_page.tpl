@@ -29,14 +29,7 @@
 			    {{!status}}
             </div>
     </center>
-    <center>
-        <form action="/dark" method="post">
-            <label class="lightsoff_toggle">
-                <input type="checkbox">
-                <span class="slider round"></span>
-            </label>
-        </form>
-    </center>
+
     <br>
     <br>
  

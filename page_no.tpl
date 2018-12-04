@@ -26,6 +26,19 @@
                 <input id="search_button" type="submit" value="Search!"/>
             </form>
         </div>
+
+        <div id="history_toggle_container">
+            <div id="history_toggle_label">
+                History
+            </div>
+            
+            <div id="history_toggle">
+                <form onclick="myFunction()">
+                    <input id="history_checkbox" type="checkbox">
+                </form>
+            </div>
+        </div>
+
         <div id="login_container">
             {{!logging}}
             <div id="status">
@@ -37,29 +50,15 @@
     <br>
     <br>
     <br>
-
-    <!-- <h1>THIS IS PAGE {{page_num}}</h1> -->
     
-    <div id="history_toggle" style="font-family: 'Open Sans', sans-serif">
-        <form onclick='myFunction()'>
-            History <input id="history_checkbox" type="checkbox"/>
-        </form>
-    </div>
-    
-
-
-    
-    <!-- <button onclick="myFunction()">History</button> -->
-      
+       
     <div id="user_table_container">
-
         <div class="history_table">
             {{!h_table}}
         </div>
     </div>
 
 
-    
 
 
     
@@ -77,6 +76,16 @@
 
     <br>
     <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     
 
 <!-- PAGE NAVIGATION HERE -->
@@ -89,6 +98,9 @@
             </div>
         </center>
     </div>
+
+
+
     
 </body>
 </html>
