@@ -11,18 +11,17 @@ from googleapiclient.errors import HttpError
 from googleapiclient.discovery import build
 
 
-
 """
 ###########################
 #      FEATURE TO DO:     #
 ###########################
 - toggle button for dark theme
+DONE- add search icon into search bar
 - toggle button to show recent search history
 - spellcheck
 	- can also create a dictionary feature
 - calculator
-- multi-word search
-
+DONE- multi-word search 
 
 """
 
@@ -181,7 +180,7 @@ def show_results(page_num):
 
 			if word not in keyword_set:
 				keyword_set[word] = count
-					
+
 		if current_status != 'visitor':
 			sorted_history = sort_search(user_history, keyword_set)
 		else:
@@ -192,26 +191,51 @@ def show_results(page_num):
 		#   Get the URLs   #
 		####################
 
-		# Extract first word searched
-		first_word = string[0]
 
-		# Get all URLs from DB
-		urls = get_urls(first_word)
 
+		# Find all the common urls for multiple searched word
+		list_of_urls = []
+		common_urls = set()
+		
+		if len(keyword_set) ==1:
+
+			# Extract first word searched
+			first_word = string[0]
+
+			# Get all URLs from DB
+			common_urls = get_urls(first_word)
+
+		if len(keyword_set) > 1:
+
+			for word in keyword_set:
+				urls = get_urls(word)
+				for u in urls:
+					list_of_urls.append(u)
+			
+			for s in range(0,len(list_of_urls)):
+				for x in range (s+1,len(list_of_urls)):
+					if list_of_urls[s]==list_of_urls[x]:
+						common_urls.add(list_of_urls[s])
+
+			common_urls = list(common_urls)
+
+		sorted_common_urls = sorted(common_urls, key=operator.itemgetter(1), reverse = True)
+		
 		# Group URLs into its corresponding page number
 		count = 0
-		for url in urls:
+		for url in sorted_common_urls:
 			if count == 5:
 				MAX_PAGES += 1
 				count = 0
-
 			page_no_urls[url[0]] = MAX_PAGES
 			count += 1
 
-
 		# Get URLs specific for the requested page number
 		db_URLs = []
+		print "------------------------"
 		for url, pg in page_no_urls.items():
+			
+			print url
 			if pg == page_num:
 				db_URLs.append(url)
 
@@ -453,9 +477,10 @@ def get_urls(keyword):
 		page_rank = cur.fetchone()
 
 		if page_rank is not None:
-			page_url_score[url_str] = page_rank
+			page_url_score[url_str] = page_rank[0]
 
 	sorted_url_score = sorted(page_url_score.items(), key=operator.itemgetter(1), reverse = True)
+
 	return sorted_url_score
 
 
@@ -471,7 +496,6 @@ def error_handler_404(error):
 def error_handler_500(error):
 	pic = 'logo.png'
 	return template('error_handler')
-
 
 
 # Local run
