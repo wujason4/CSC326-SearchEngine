@@ -173,27 +173,21 @@ def show_results(page_num):
 		if current_status != 'visitor':
 			sorted_history.append(query_string)
 		
-		# # Extract all unique words and store with count
-		# for word in string:
+		# Extract all unique words and store with count
+		for word in string:
 
-		# 	regex = r"\b" + re.escape(word) + r"\b"
-		# 	count = sum(1 for match in re.finditer(regex, query_string))
+			regex = r"\b" + re.escape(word) + r"\b"
+			count = sum(1 for match in re.finditer(regex, query_string))
 
 
-		# 	if word not in keyword_set:
-		# 		keyword_set[word] = count
-					
-		# if current_status != 'visitor':
-		# 	sorted_history = sort_search(user_history, keyword_set)
-		# else:
-		# 	sorted_history = sort_search(visitor_history,keyword_set)
+			if word not in keyword_set:
+				keyword_set[word] = count
+
 
 		
 		####################
 		#   Get the URLs   #
 		####################
-
-
 
 		# Find all the common urls for multiple searched word
 		list_of_urls = []
@@ -234,10 +228,7 @@ def show_results(page_num):
 
 		# Get URLs specific for the requested page number
 		db_URLs = []
-		print "------------------------"
 		for url, pg in page_no_urls.items():
-			
-			print url
 			if pg == page_num:
 				db_URLs.append(url)
 
